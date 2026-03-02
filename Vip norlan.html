@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productividad Empresa</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#0a0a0a,#1a1a1a);
+    color:white;
+}
+
+/* ===== PANTALLA PIN ===== */
+#pinScreen{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:linear-gradient(135deg,#000,#111);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.pin-box{
+    background:rgba(255,215,0,0.08);
+    border:1px solid gold;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 30px rgba(255,215,0,0.4);
+}
+
+.pin-box input{
+    padding:12px;
+    font-size:20px;
+    text-align:center;
+    border:none;
+    border-radius:10px;
+}
+
+button{
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:30px;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.container{
+    padding:20px;
+    max-width:600px;
+    margin:auto;
+}
+
+.card{
+    background:rgba(255,255,255,0.05);
+    padding:15px;
+    border-radius:20px;
+    margin-bottom:15px;
+    box-shadow:0 0 15px rgba(255,215,0,0.2);
+}
+
+h2,h3{
+    color:gold;
+}
+
+input[type=number]{
+    width:60px;
+    padding:5px;
+    margin:3px;
+    border-radius:10px;
+    border:none;
+    text-align:center;
+}
+
+.vip-number{
+    padding:6px 15px;
+    border-radius:15px;
+    font-weight:bold;
+}
+
+.green{ background:#0f5132; }
+.yellow{ background:#664d03; }
+.red{ background:#842029; }
+.purple{ background:#3d0a91; }
+
+.progress{
+    height:15px;
+    background:#333;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:gold;
+    transition:width 1s ease;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ====== PANTALLA DE PIN ====== -->
+<div id="pinScreen">
+    <div class="pin-box">
+        <h2>🔐 ACCESO EMPRESARIAL</h2>
+        <p id="pinText">Ingresa tu PIN</p>
+        <input type="password" id="pinInput" maxlength="6"><br>
+        <button onclick="checkPin()">Entrar</button>
+    </div>
+</div>
+
+<!-- ====== APP ====== -->
+<div class="container">
+<h2>📊 PRODUCTIVIDAD EMPRESA</h2>
+
+<div id="weeks"></div>
+
+<button onclick="calcularMensual()">CALCULAR MENSUAL</button>
+
+<div class="card">
+    <div id="resultado"></div>
+    <div class="progress">
+        <div class="progress-bar" id="barra"></div>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+/* ===== CONFIGURA TU PIN AQUÍ ===== */
+const EMPRESA_PIN = "nor25";  // 🔴 CAMBIA ESTO POR TU PIN REAL
+
+let intentos = 0;
+let bloqueado = false;
+
+/* ===== VERIFICAR PIN ===== */
+function checkPin(){
+    if(bloqueado) return;
+
+    let input = document.getElementById("pinInput").value;
+
+    if(input === EMPRESA_PIN){
+        document.getElementById("pinScreen").style.display="none";
+    }else{
+        intentos++;
+        let restantes = 3 - intentos;
+
+        if(restantes > 0){
+            alert("PIN incorrecto. Intentos restantes: " + restantes);
+        }else{
+            bloquear();
+        }
+    }
+}
+
+/* ===== BLOQUEO 30 SEGUNDOS ===== */
+function bloquear(){
+    bloqueado = true;
+    document.getElementById("pinText").innerText = "🔒 Bloqueado 30 segundos";
+
+    setTimeout(()=>{
+        intentos = 0;
+        bloqueado = false;
+        document.getElementById("pinText").innerText = "Ingresa tu PIN";
+    },30000);
+}
+
+/* ===== CREAR 4 SEMANAS ===== */
+function crearSemanas(){
+    let cont="";
+    for(let s=1;s<=4;s++){
+        cont+=`<div class="card"><h3>Semana ${s}</h3>`;
+        for(let d=1;d<=6;d++){
+            cont+=`<input type="number" id="s${s}d${d}" placeholder="%">`;
+        }
+        cont+=`</div>`;
+    }
+    document.getElementById("weeks").innerHTML=cont;
+}
+crearSemanas();
+
+/* ===== CÁLCULO MENSUAL ===== */
+function calcularMensual(){
+    let total=0;
+    let count=0;
+
+    for(let s=1;s<=4;s++){
+        for(let d=1;d<=6;d++){
+            let val=parseFloat(document.getElementById(`s${s}d${d}`).value)||0;
+            total+=val;
+            count++;
+        }
+    }
+
+    let promedio=(total/count).toFixed(1);
+    let clase="green";
+
+    if(promedio<100) clase="red";
+    else if(promedio<110) clase="yellow";
+    else if(promedio>=120) clase="purple";
+
+    let incentivo=0;
+    if(promedio>=120) incentivo=4000;
+    else if(promedio>=110) incentivo=2700;
+    else if(promedio>=100) incentivo=1500;
+
+    document.getElementById("resultado").innerHTML=
+        `Promedio mensual: <span class="vip-number ${clase}">${promedio}%</span><br>
+         Incentivo estimado: <span class="vip-number ${clase}">C$ ${incentivo}</span>`;
+
+    let progreso=(promedio/120)*100;
+    if(progreso>100) progreso=100;
+    document.getElementById("barra").style.width=progreso+"%";
+}
+
+</script>
+
+</body>
+</html>
