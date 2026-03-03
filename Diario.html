@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>📅 Control Diario - Norlan García (Corregido)</title>
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+body{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:#1e2a3a;
+    padding:10px;
+    margin:0;
+    color:white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.container{
+    background:white;
+    color:black;
+    padding:15px;
+    border-radius:25px;
+    max-width:100%;
+    width:100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+h2{
+    color:#1e3c72;
+    font-size: 1.3rem;
+    margin:5px 0 15px 0;
+    text-align:center;
+}
+.fecha-bar {
+    background: #ffc107;
+    padding: 8px 15px;
+    border-radius: 40px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.fecha-bar select, .fecha-bar button {
+    padding: 8px 15px;
+    border-radius: 30px;
+    border: none;
+    font-weight: bold;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.input-group{
+    background:#e9f0fc;
+    padding:15px;
+    border-radius:20px;
+    margin-bottom:15px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+.input-group div{
+    display:flex;
+    flex-direction:column;
+}
+.input-group label{
+    font-weight:bold;
+    margin-bottom:3px;
+    font-size:0.75rem;
+    color:#2c3e50;
+}
+.input-group input, .input-group select{
+    padding:8px 5px;
+    border-radius:25px;
+    border:2px solid #3498db;
+    text-align:center;
+    font-weight:bold;
+    font-size: 0.9rem;
+    background: white;
+    width:100%;
+}
+.table-wrapper {
+    overflow-x: auto;
+    margin: 0 -5px;
+    padding: 0 5px;
+    border-radius: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8fafc;
+    border-radius: 15px;
+    min-width: 650px;
+}
+th {
+    background: #2c3e50;
+    color: white;
+    padding: 10px 5px;
+    font-size: 0.75rem;
+}
+td {
+    padding: 8px 3px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.75rem;
+}
+td input[type=number] {
+    width: 50px;
+    padding: 6px 2px;
+    text-align: center;
+    font-size: 0.8rem;
+    border: 2px solid #3498db;
+    border-radius: 20px;
+}
+.total-row {
+    background: #d9e2ec;
+    font-weight: bold;
+}
+.verde {
+    background: #d4edda;
+    color: #155724;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 40px;
+}
+.rojo {
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 40px;
+}
+button {
+    padding: 15px 30px;
+    background: #ffc107;
+    border: none;
+    border-radius: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 15px auto;
+    font-size: 1.2rem;
+    width: calc(100% - 30px);
+    max-width: 300px;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+}
+button:active {
+    transform: scale(0.98);
+}
+.result {
+    background: #eef2f6;
+    padding: 15px;
+    border-radius: 20px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    text-align: left;
+}
+.result p {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.result span {
+    font-weight: bold;
+    color: #1e3c72;
+    background: #ffc107;
+    padding: 5px 15px;
+    border-radius: 30px;
+    display: inline-block;
+    margin: 2px;
+    font-size: 0.85rem;
+}
+.botones-historial {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+.botones-historial button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    margin: 0;
+    width: auto;
+    max-width: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>📅 CONTROL DIARIO - NORLAN GARCÍA (CORREGIDO)</h2>
+
+<div class="fecha-bar">
+    <span>📆 Fecha:</span>
+    <input type="date" id="selectorFecha" value="">
+    <button onclick="cargarFecha()">📂 Cargar</button>
+    <button onclick="reiniciarDia()">🆕 Nuevo Día</button>
+</div>
+
+<div class="input-group">
+    <div><label>📦 Tareas totales:</label><input type="number" id="tareas" value="283"></div>
+    <div><label>🍽️ Desayuno (horas):</label><input type="number" id="desayuno" value="0.5" step="0.5"></div>
+    <div><label>⏰ Hora pedida:</label>
+        <select id="horaPedida">
+            <option value="10">10am</option><option value="11">11am</option>
+            <option value="12" selected>12pm</option><option value="13">1pm</option><option value="14">2pm</option>
+        </select>
+    </div>
+    <div><label>⏱️ Hora real:</label>
+        <select id="horaReal">
+            <option value="8">8am</option><option value="9">9am</option><option value="10">10am</option>
+            <option value="11" selected>11am</option><option value="12">12pm</option>
+            <option value="13">1pm</option><option value="14">2pm</option>
+        </select>
+    </div>
+    <div><label>⏱️ Minutos reales:</label>
+        <select id="minutosReal">
+            <option value="0">00</option><option value="15">15</option>
+            <option value="30" selected>30</option><option value="45">45</option>
+        </select>
+    </div>
+</div>
+
+<div class="table-wrapper">
+<table>
+    <tr><th>#</th><th>Hora</th><th>Meta</th><th>Real</th><th>M.Acum</th><th>R.Acum</th><th>Dif</th><th>Ritmo</th></tr>
+    <tr><td>1</td><td>6-8</td><td><input type="number" id="m1" value="80"></td><td><input type="number" id="r1" value="0"></td><td id="ma1">0</td><td id="ra1">0</td><td id="dif1" class="rojo">0</td><td id="ritmo1">-</td></tr>
+    <tr><td>2</td><td>8-10</td><td><input type="number" id="m2" value="80"></td><td><input type="number" id="r2" value="0"></td><td id="ma2">0</td><td id="ra2">0</td><td id="dif2" class="rojo">0</td><td id="ritmo2">-</td></tr>
+    <tr><td>3</td><td>10-12</td><td><input type="number" id="m3" value="80"></td><td><input type="number" id="r3" value="0"></td><td id="ma3">0</td><td id="ra3">0</td><td id="dif3" class="rojo">0</td><td id="ritmo3">-</td></tr>
+    <tr><td>4</td><td>12-14</td><td><input type="number" id="m4" value="43"></td><td><input type="number" id="r4" value="0"></td><td id="ma4">0</td><td id="ra4">0</td><td id="dif4" class="rojo">0</td><td id="ritmo4">-</td></tr>
+    <tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td id="metaTotal">283</td><td id="realTotal">0</td><td>-</td><td id="raFinal">0</td><td id="difTotal" class="rojo">0</td><td>-</td></tr>
+</table>
+</div>
+
+<div class="botones-historial">
+    <button onclick="guardarDia()">💾 Guardar este día</button>
+    <button onclick="verHistorial()">📜 Ver historial</button>
+</div>
+
+<button onclick="calcular()">📊 CALCULAR AHORA</button>
+<div class="result" id="resultado"></div>
+
+</div>
+
+<script>
+// ==================== FUNCIONES DE GUARDADO ====================
+function obtenerFechaActual() {
+    let hoy = new Date();
+    let año = hoy.getFullYear();
+    let mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    let dia = String(hoy.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${dia}`;
+}
+
+function guardarDia() {
+    let fecha = document.getElementById('selectorFecha').value;
+    if (!fecha) fecha = obtenerFechaActual();
+
+    let datos = {
+        tareas: document.getElementById('tareas').value,
+        desayuno: document.getElementById('desayuno').value,
+        horaPedida: document.getElementById('horaPedida').value,
+        horaReal: document.getElementById('horaReal').value,
+        minutosReal: document.getElementById('minutosReal').value,
+        metas: [
+            document.getElementById('m1').value,
+            document.getElementById('m2').value,
+            document.getElementById('m3').value,
+            document.getElementById('m4').value
+        ],
+        reales: [
+            document.getElementById('r1').value,
+            document.getElementById('r2').value,
+            document.getElementById('r3').value,
+            document.getElementById('r4').value
+        ]
+    };
+
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    historial[fecha] = datos;
+    localStorage.setItem('historialNorlan', JSON.stringify(historial));
+
+    alert(`✅ Datos guardados para el ${fecha}`);
+}
+
+function cargarFecha() {
+    let fecha = document.getElementById('selectorFecha').value;
+    if (!fecha) {
+        alert('❌ Seleccioná una fecha');
+        return;
+    }
+
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    let datos = historial[fecha];
+
+    if (!datos) {
+        alert('❌ No hay datos guardados para esa fecha');
+        return;
+    }
+
+    document.getElementById('tareas').value = datos.tareas;
+    document.getElementById('desayuno').value = datos.desayuno;
+    document.getElementById('horaPedida').value = datos.horaPedida;
+    document.getElementById('horaReal').value = datos.horaReal;
+    document.getElementById('minutosReal').value = datos.minutosReal;
+
+    document.getElementById('m1').value = datos.metas[0];
+    document.getElementById('m2').value = datos.metas[1];
+    document.getElementById('m3').value = datos.metas[2];
+    document.getElementById('m4').value = datos.metas[3];
+
+    document.getElementById('r1').value = datos.reales[0];
+    document.getElementById('r2').value = datos.reales[1];
+    document.getElementById('r3').value = datos.reales[2];
+    document.getElementById('r4').value = datos.reales[3];
+
+    calcular();
+    alert(`✅ Datos cargados para ${fecha}`);
+}
+
+function reiniciarDia() {
+    if (confirm('¿Crear nuevo día? Los datos actuales se perderán si no los guardaste.')) {
+        document.getElementById('tareas').value = '283';
+        document.getElementById('desayuno').value = '0.5';
+        document.getElementById('horaPedida').value = '12';
+        document.getElementById('horaReal').value = '11';
+        document.getElementById('minutosReal').value = '30';
+
+        document.getElementById('m1').value = '80';
+        document.getElementById('m2').value = '80';
+        document.getElementById('m3').value = '80';
+        document.getElementById('m4').value = '43';
+
+        document.getElementById('r1').value = '0';
+        document.getElementById('r2').value = '0';
+        document.getElementById('r3').value = '0';
+        document.getElementById('r4').value = '0';
+
+        let hoy = obtenerFechaActual();
+        document.getElementById('selectorFecha').value = hoy;
+
+        calcular();
+    }
+}
+
+function verHistorial() {
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    let fechas = Object.keys(historial).sort().reverse();
+
+    if (fechas.length === 0) {
+        alert('📭 No hay días guardados aún.');
+        return;
+    }
+
+    let mensaje = '📅 DÍAS GUARDADOS:\n';
+    fechas.forEach(f => mensaje += `• ${f}\n`);
+    alert(mensaje);
+}
+
+// ==================== FUNCIÓN DE CÁLCULO CORREGIDA ====================
+function calcular() {
+    let tareas = parseFloat(document.getElementById("tareas").value) || 0;
+    let horaPedida = parseInt(document.getElementById("horaPedida").value);
+    let horaReal = parseInt(document.getElementById("horaReal").value);
+    let minutosReal = parseInt(document.getElementById("minutosReal").value) || 0;
+    let desayuno = parseFloat(document.getElementById("desayuno").value) || 0;
+    let almuerzo = 0.5; // Fijo: media hora de almuerzo
+    
+    let m1 = +document.getElementById("m1").value || 0;
+    let m2 = +document.getElementById("m2").value || 0;
+    let m3 = +document.getElementById("m3").value || 0;
+    let m4 = +document.getElementById("m4").value || 0;
+    
+    let r1 = +document.getElementById("r1").value || 0;
+    let r2 = +document.getElementById("r2").value || 0;
+    let r3 = +document.getElementById("r3").value || 0;
+    let r4 = +document.getElementById("r4").value || 0;
+    
+    let ma1 = m1, ma2 = m1 + m2, ma3 = m1 + m2 + m3, ma4 = m1 + m2 + m3 + m4;
+    let ra1 = r1, ra2 = r1 + r2, ra3 = r1 + r2 + r3, ra4 = r1 + r2 + r3 + r4;
+    
+    document.getElementById("ma1").innerText = ma1;
+    document.getElementById("ma2").innerText = ma2;
+    document.getElementById("ma3").innerText = ma3;
+    document.getElementById("ma4").innerText = ma4;
+    
+    document.getElementById("ra1").innerText = ra1;
+    document.getElementById("ra2").innerText = ra2;
+    document.getElementById("ra3").innerText = ra3;
+    document.getElementById("ra4").innerText = ra4;
+    document.getElementById("raFinal").innerText = ra4;
+    
+    document.getElementById("metaTotal").innerText = ma4;
+    document.getElementById("realTotal").innerText = ra4;
+    
+    let d1 = ra1 - ma1, d2 = ra2 - ma2, d3 = ra3 - ma3, d4 = ra4 - ma4;
+    
+    function setDif(id, val) {
+        let el = document.getElementById(id);
+        el.innerText = (val >= 0 ? '+' : '') + val;
+        el.className = val >= 0 ? 'verde' : 'rojo';
+    }
+    setDif('dif1', d1); setDif('dif2', d2); setDif('dif3', d3); setDif('dif4', d4); setDif('difTotal', d4);
+    
+    document.getElementById("ritmo1").innerText = (ma1 / 2).toFixed(1) + 't';
+    document.getElementById("ritmo2").innerText = ((ma2 - ma1) / 2).toFixed(1) + 't';
+    document.getElementById("ritmo3").innerText = ((ma3 - ma2) / 2).toFixed(1) + 't';
+    document.getElementById("ritmo4").innerText = ((ma4 - ma3) / 2).toFixed(1) + 't';
+    
+    // ===== CORRECCIÓN: HORAS BASE CON ALMUERZO SI APLICA =====
+    let horasBase;
+    if (horaPedida === 14) { // 2pm
+        horasBase = horaPedida - 6 - desayuno - almuerzo; // 8h - 0.5 - 0.5 = 7h
+    } else {
+        horasBase = horaPedida - 6 - desayuno;
+    }
+    horasBase = Math.max(0, horasBase);
+    
+    // ===== CORRECCIÓN: HORAS REALES =====
+    let horasReales;
+    if (horaReal >= 12) { // Si terminó después de las 12, ya almorzó
+        horasReales = horaReal - 6 - desayuno - almuerzo + minutosReal / 60;
+    } else { // Si terminó antes de las 12, no almuerzo
+        horasReales = horaReal - 6 - desayuno + minutosReal / 60;
+    }
+    horasReales = Math.max(0, horasReales);
+    
+    let ritmoBase = horasBase > 0 ? tareas / horasBase : 0;
+    let ritmoReal = horasReales > 0 ? ra4 / horasReales : 0;
+    
+    let diffHoras = horasBase - horasReales;
+    let productividad = ritmoBase > 0 ? (ritmoReal / ritmoBase) * 100 : 0;
+    
+    let rango = "", incentivo = 0;
+    if (productividad >= 130) { rango = "130% o más"; incentivo = 3150; }
+    else if (productividad >= 120) { rango = "120-129.99%"; incentivo = 3000; }
+    else if (productividad >= 110) { rango = "110-119.99%"; incentivo = 2850; }
+    else if (productividad >= 100) { rango = "100-109.99%"; incentivo = 2700; }
+    else if (productividad >= 90) { rango = "90-99.99%"; incentivo = 2400; }
+    else if (productividad >= 80) { rango = "80-89.99%"; incentivo = 2100; }
+    else { rango = "<80%"; incentivo = 0; }
+    
+    document.getElementById("resultado").innerHTML = `
+        <p>⏳ Horas base: ${horasBase.toFixed(2)}h | Ritmo base: ${ritmoBase.toFixed(2)} t/h</p>
+        <p>⏱️ Tus horas: ${horasReales.toFixed(2)}h | Ritmo real: ${ritmoReal.toFixed(2)} t/h</p>
+        <p>📊 Diferencia: ${diffHoras >= 0 ? '✅' : '❌'} ${Math.abs(diffHoras).toFixed(2)}h</p>
+        <p>📈 Productividad: <span>${productividad.toFixed(1)}%</span></p>
+        <p>🎯 Rango: <span>${rango}</span> | 💰 Incentivo: <span>C$${incentivo}</span></p>
+    `;
+}
+
+// ==================== INICIALIZACIÓN ====================
+document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calcular));
+document.getElementById('selectorFecha').value = obtenerFechaActual();
+calcular();
+</script>
+</body>
+  </html>
