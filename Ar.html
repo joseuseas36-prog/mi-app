@@ -1,0 +1,397 @@
+<!-- SECCIÓN IA - ANÁLISIS PREDICTIVO -->
+<div class="glass-card" style="margin-top: 20px; background: linear-gradient(145deg, #1a2a3f, #0f1a2f);">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+        <span style="font-size: 24px;">🤖</span>
+        <h3 style="color: #ffd700; margin: 0;">IA PREDICTIVA</h3>
+        <span style="background: rgba(255,215,0,0.2); padding: 4px 12px; border-radius: 40px; font-size: 12px; color: #ffd700;">BETA</span>
+    </div>
+
+    <!-- TARJETAS DE PREDICCIÓN -->
+    <div class="metric-cards" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="metric-card" style="padding: 12px;">
+            <div class="metric-label">📊 PROYECCIÓN</div>
+            <div class="metric-value" id="iaProyeccion" style="font-size: 22px;">0%</div>
+            <div class="metric-badge" id="iaBadgeProyeccion">estimado</div>
+        </div>
+        <div class="metric-card" style="padding: 12px;">
+            <div class="metric-label">💰 INCENTIVO PROY.</div>
+            <div class="metric-value" id="iaIncentivo" style="font-size: 22px;">C$ 0</div>
+            <div class="metric-badge" id="iaBadgeIncentivo">potencial</div>
+        </div>
+        <div class="metric-card" style="padding: 12px;">
+            <div class="metric-label">🎯 META PROY.</div>
+            <div class="metric-value" id="iaMeta" style="font-size: 22px;">0%</div>
+            <div class="metric-badge" id="iaBadgeMeta">necesario</div>
+        </div>
+    </div>
+
+    <!-- RECOMENDACIONES IA -->
+    <div style="background: rgba(0,0,0,0.3); border-radius: 20px; padding: 16px; margin: 16px 0;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <span>💡</span>
+            <span style="color: #b7c9e2; font-weight: 600;">RECOMENDACIONES INTELIGENTES</span>
+        </div>
+        <div id="iaRecomendaciones" style="color: #8fa5c5; font-size: 14px; line-height: 1.6;">
+            Comienza a ingresar datos para obtener análisis predictivo...
+        </div>
+    </div>
+
+    <!-- ALERTAS Y PATRONES -->
+    <div id="iaAlertas" style="display: none; background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); border-radius: 16px; padding: 12px; margin-top: 12px;">
+        <div style="display: flex; gap: 8px; color: #ff8a8a;">
+            <span>⚠️</span>
+            <span id="iaAlertasTexto"></span>
+        </div>
+    </div>
+
+    <!-- BOTÓN DE ANÁLISIS PROFUNDO -->
+    <button class="icon-btn" onclick="analisisProfundoIA()" style="width: 100%; margin-top: 12px; padding: 12px; background: rgba(255,215,0,0.1);">
+        🔍 ANALIZAR PATRONES OCULTOS
+    </button>
+</div>
+
+<script>
+// =============================================
+// SISTEMA DE IA PARA PRODUCTIVIDAD
+// =============================================
+
+// Función principal de IA que se ejecuta al calcular
+function analizarConIA() {
+    // Recolectar datos históricos
+    const datos = recolectarDatosIA();
+    
+    if (datos.totalDias < 7) {
+        document.getElementById('iaRecomendaciones').innerHTML = 
+            "📝 Ingresa más datos (mínimo 7 días) para activar el análisis predictivo.";
+        return;
+    }
+    
+    // 1. PREDECIR TENDENCIA (Regresión lineal simple)
+    const prediccion = predecirTendencia(datos.valores);
+    
+    // 2. CALCULAR META NECESARIA
+    const metaNecesaria = calcularMetaNecesaria(datos.promedioActual);
+    
+    // 3. PROYECTAR INCENTIVO
+    const incentivoProyectado = proyectarIncentivo(prediccion.promedioProyectado);
+    
+    // 4. GENERAR RECOMENDACIONES
+    const recomendaciones = generarRecomendacionesIA(datos, prediccion);
+    
+    // 5. DETECTAR PATRONES
+    const patrones = detectarPatronesIA(datos);
+    
+    // Actualizar UI
+    actualizarUI_IA(prediccion, metaNecesaria, incentivoProyectado, recomendaciones, patrones);
+}
+
+// Recolectar todos los datos para IA
+function recolectarDatosIA() {
+    const valores = [];
+    const diasSemana = [];
+    
+    // Recolectar todos los inputs
+    for(let s=1; s<=4; s++) {
+        for(let d=1; d<=6; d++) {
+            const valor = parseFloat(document.getElementById(`s${s}d${d}`).value) || 0;
+            valores.push(valor);
+            
+            // Guardar día de la semana (0=Lunes, 5=Sábado)
+            diasSemana.push({
+                dia: d-1,
+                valor: valor,
+                semana: s
+            });
+        }
+    }
+    
+    // Calcular promedio actual (usando solo días con datos)
+    const valoresReales = valores.filter(v => v > 0);
+    const promedioActual = valoresReales.length > 0 ? 
+        valoresReales.reduce((a,b) => a+b, 0) / valoresReales.length : 0;
+    
+    return {
+        valores: valores,
+        diasSemana: diasSemana,
+        promedioActual: promedioActual,
+        totalDias: valoresReales.length,
+        maximo: Math.max(...valores),
+        minimo: Math.min(...valores.filter(v => v > 0))
+    };
+}
+
+// IA: Predicción de tendencia usando regresión lineal
+function predecirTendencia(datos) {
+    // Filtrar días con datos
+    const puntos = [];
+    for(let i=0; i<datos.length; i++) {
+        if(datos[i] > 0) {
+            puntos.push({
+                x: i, // día como número
+                y: datos[i]
+            });
+        }
+    }
+    
+    if(puntos.length < 3) {
+        return {
+            tendencia: "estable",
+            promedioProyectado: datos.filter(v => v>0).reduce((a,b) => a+b, 0) / datos.filter(v => v>0).length,
+            confianza: "baja"
+        };
+    }
+    
+    // Calcular regresión lineal simple
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    const n = puntos.length;
+    
+    for(let p of puntos) {
+        sumX += p.x;
+        sumY += p.y;
+        sumXY += p.x * p.y;
+        sumX2 += p.x * p.x;
+    }
+    
+    const pendiente = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const promedioActual = sumY / n;
+    
+    // Determinar tendencia
+    let tendencia = "estable";
+    if(pendiente > 0.5) tendencia = "creciente";
+    if(pendiente < -0.5) tendencia = "decreciente";
+    
+    // Proyectar promedio futuro (próximos 7 días)
+    const ultimoDia = puntos[puntos.length-1].x;
+    const promedioProyectado = promedioActual + (pendiente * 7);
+    
+    return {
+        tendencia: tendencia,
+        pendiente: pendiente,
+        promedioProyectado: Math.min(200, Math.max(0, promedioProyectado)),
+        promedioActual: promedioActual,
+        confianza: puntos.length > 10 ? "alta" : (puntos.length > 5 ? "media" : "baja")
+    };
+}
+
+// Calcular meta necesaria para alcanzar incentivo
+function calcularMetaNecesaria(promedioActual) {
+    const metas = [
+        { incentivo: 3150, meta: 130 },
+        { incentivo: 3000, meta: 120 },
+        { incentivo: 2850, meta: 110 },
+        { incentivo: 2700, meta: 100 },
+        { incentivo: 2400, meta: 90 },
+        { incentivo: 2100, meta: 80 }
+    ];
+    
+    for(let m of metas) {
+        if(promedioActual < m.meta) {
+            const necesario = (m.meta * 24 - promedioActual * 24) / (24 - 6); // 24 días totales, 6 restantes aprox
+            return {
+                meta: m.meta,
+                necesario: Math.max(0, necesario),
+                incentivo: m.incentivo
+            };
+        }
+    }
+    
+    return { meta: 130, necesario: 0, incentivo: 3150 };
+}
+
+// Proyectar incentivo basado en tendencia
+function proyectarIncentivo(promedioProyectado) {
+    if(promedioProyectado >= 130) return 3150;
+    if(promedioProyectado >= 120) return 3000;
+    if(promedioProyectado >= 110) return 2850;
+    if(promedioProyectado >= 100) return 2700;
+    if(promedioProyectado >= 90) return 2400;
+    if(promedioProyectado >= 80) return 2100;
+    return 0;
+}
+
+// Generar recomendaciones personalizadas
+function generarRecomendacionesIA(datos, prediccion) {
+    let recomendaciones = [];
+    
+    // Recomendación basada en tendencia
+    if(prediccion.tendencia === "creciente") {
+        recomendaciones.push("📈 Vas en aumento! Sigue con la misma estrategia.");
+    } else if(prediccion.tendencia === "decreciente") {
+        recomendaciones.push("📉 Alerta: tendencia a la baja. Identifica qué cambió.");
+    }
+    
+    // Recomendación basada en consistencia
+    const variacion = datos.maximo - datos.minimo;
+    if(variacion > 50 && datos.minimo > 0) {
+        recomendaciones.push("🎯 Mucha variabilidad. Intenta ser más consistente.");
+    }
+    
+    // Recomendación de días específicos
+    const diasBajos = encontrarDiasBajos(datos.diasSemana);
+    if(diasBajos.length > 0) {
+        recomendaciones.push(`⚠️ Tus días más bajos: ${diasBajos.join(', ')}. Enfócate ahí.`);
+    }
+    
+    // Recomendación de incentivo
+    if(prediccion.promedioProyectado >= 130) {
+        recomendaciones.push("🏆 Vas camino a incentivo máximo! Sigue así.");
+    } else if(prediccion.promedioProyectado >= 100) {
+        recomendaciones.push("🎯 Bien encaminado al incentivo. Mantén el ritmo.");
+    }
+    
+    return recomendaciones;
+}
+
+// Encontrar días con bajo rendimiento recurrente
+function encontrarDiasBajos(diasSemana) {
+    const promediosPorDia = [0,0,0,0,0,0];
+    const conteos = [0,0,0,0,0,0];
+    const nombres = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+    
+    for(let d of diasSemana) {
+        if(d.valor > 0) {
+            promediosPorDia[d.dia] += d.valor;
+            conteos[d.dia]++;
+        }
+    }
+    
+    const diasBajos = [];
+    for(let i=0; i<6; i++) {
+        if(conteos[i] > 0) {
+            const promedio = promediosPorDia[i] / conteos[i];
+            if(promedio < 70 && promedio > 0) {
+                diasBajos.push(nombres[i]);
+            }
+        }
+    }
+    
+    return diasBajos;
+}
+
+// Detectar patrones ocultos
+function detectarPatronesIA(datos) {
+    const patrones = [];
+    
+    // Patrón de fin de semana vs semana
+    let sumaSemana = 0, sumaFinde = 0, contSemana = 0, contFinde = 0;
+    
+    for(let d of datos.diasSemana) {
+        if(d.valor > 0) {
+            if(d.dia < 5) { // Lunes a Viernes
+                sumaSemana += d.valor;
+                contSemana++;
+            } else { // Sábado
+                sumaFinde += d.valor;
+                contFinde++;
+            }
+        }
+    }
+    
+    if(contSemana > 0 && contFinde > 0) {
+        const promSemana = sumaSemana / contSemana;
+        const promFinde = sumaFinde / contFinde;
+        
+        if(promFinde < promSemana * 0.7) {
+            patrones.push("rendimiento.finde_bajo");
+        }
+    }
+    
+    return patrones;
+}
+
+// Análisis profundo (botón especial)
+function analisisProfundoIA() {
+    const datos = recolectarDatosIA();
+    const prediccion = predecirTendencia(datos.valores);
+    
+    let analisis = "🔍 ANÁLISIS DETALLADO:\n\n";
+    
+    // Estadísticas avanzadas
+    const valoresOrdenados = datos.valores.filter(v => v>0).sort((a,b) => a-b);
+    const mediana = valoresOrdenados[Math.floor(valoresOrdenados.length/2)];
+    
+    analisis += `📊 Mediana: ${mediana.toFixed(1)}%\n`;
+    analisis += `📈 Tendencia: ${prediccion.tendencia} (${prediccion.pendiente > 0 ? '+' : ''}${prediccion.pendiente.toFixed(2)}% por día)\n`;
+    analisis += `🎯 Consistencia: ${(100 - (datos.maximo - datos.minimo)).toFixed(0)}%\n`;
+    analisis += `💡 Confianza predictiva: ${prediccion.confianza}\n\n`;
+    
+    if(prediccion.promedioProyectado > datos.promedioActual) {
+        analisis += "✅ Proyección positiva: mejorarás " + (prediccion.promedioProyectado - datos.promedioActual).toFixed(1) + "%";
+    } else {
+        analisis += "⚠️ Proyección negativa: bajarás " + (datos.promedioActual - prediccion.promedioProyectado).toFixed(1) + "%";
+    }
+    
+    alert(analisis);
+}
+
+// Actualizar UI con resultados de IA
+function actualizarUI_IA(prediccion, metaNecesaria, incentivoProyectado, recomendaciones, patrones) {
+    // Proyección
+    document.getElementById('iaProyeccion').innerText = prediccion.promedioProyectado.toFixed(1) + '%';
+    
+    // Badge de proyección
+    const badgeProyeccion = document.getElementById('iaBadgeProyeccion');
+    badgeProyeccion.innerText = prediccion.tendencia;
+    badgeProyeccion.className = 'metric-badge ' + 
+        (prediccion.tendencia === 'creciente' ? 'badge-green' : 
+         prediccion.tendencia === 'decreciente' ? 'badge-red' : 'badge-yellow');
+    
+    // Incentivo proyectado
+    document.getElementById('iaIncentivo').innerText = 'C$ ' + incentivoProyectado;
+    document.getElementById('iaBadgeIncentivo').innerText = 
+        incentivoProyectado > 0 ? 'posible' : 'no aplica';
+    
+    // Meta necesaria
+    if(metaNecesaria.necesario > 0) {
+        document.getElementById('iaMeta').innerText = metaNecesaria.necesario.toFixed(1) + '%';
+        document.getElementById('iaBadgeMeta').innerHTML = `para C$${metaNecesaria.incentivo}`;
+    } else {
+        document.getElementById('iaMeta').innerText = '✓ lista';
+        document.getElementById('iaBadgeMeta').innerHTML = 'meta alcanzada';
+    }
+    
+    // Recomendaciones
+    if(recomendaciones.length > 0) {
+        let html = '';
+        recomendaciones.forEach(r => {
+            html += `<div style="margin-bottom: 8px; padding-left: 20px; position: relative;">
+                <span style="position: absolute; left: 0;">•</span> ${r}
+            </div>`;
+        });
+        document.getElementById('iaRecomendaciones').innerHTML = html;
+    }
+    
+    // Alertas (si hay patrones críticos)
+    if(patrones.includes("rendimiento.finde_bajo")) {
+        document.getElementById('iaAlertasTexto').innerText = 
+            "Tus sábados son 30% más bajos. Podrías redistribuir esfuerzos.";
+        document.getElementById('iaAlertas').style.display = 'block';
+    } else {
+        document.getElementById('iaAlertas').style.display = 'none';
+    }
+}
+
+// Modificar la función calcularTodo existente para incluir IA
+const calcularTodoOriginal = calcularTodo;
+calcularTodo = function() {
+    calcularTodoOriginal();
+    analizarConIA();
+};
+
+// Inicializar IA
+window.onload = function() {
+    // Código existente...
+    if (typeof window.onloadOriginal === 'function') window.onloadOriginal();
+    
+    // Agregar event listeners a todos los inputs para actualizar IA en tiempo real
+    for(let s=1; s<=4; s++) {
+        for(let d=1; d<=6; d++) {
+            document.getElementById(`s${s}d${d}`).addEventListener('input', function() {
+                // Debounce para no calcular demasiado seguido
+                clearTimeout(window.iaTimer);
+                window.iaTimer = setTimeout(analizarConIA, 500);
+            });
+        }
+    }
+};
+  </script>
