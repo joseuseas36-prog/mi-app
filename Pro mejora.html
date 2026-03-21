@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>📅 Control Producción - Norlan García</title>
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+body{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:#1e2a3a;
+    padding:10px;
+    margin:0;
+    color:white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.container{
+    background:white;
+    color:black;
+    padding:15px;
+    border-radius:25px;
+    max-width:100%;
+    width:100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+h2{
+    color:#1e3c72;
+    font-size: 1.3rem;
+    margin:5px 0 15px 0;
+    text-align:center;
+}
+.fecha-bar {
+    background: #ffc107;
+    padding: 8px 15px;
+    border-radius: 40px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.fecha-bar select, .fecha-bar button, .fecha-bar input {
+    padding: 8px 15px;
+    border-radius: 30px;
+    border: none;
+    font-weight: bold;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.fecha-bar input {
+    cursor: text;
+}
+.input-group{
+    background:#e9f0fc;
+    padding:15px;
+    border-radius:20px;
+    margin-bottom:15px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+.input-group div{
+    display:flex;
+    flex-direction:column;
+}
+.input-group label{
+    font-weight:bold;
+    margin-bottom:3px;
+    font-size:0.75rem;
+    color:#2c3e50;
+}
+.input-group input, .input-group select{
+    padding:8px 5px;
+    border-radius:25px;
+    border:2px solid #3498db;
+    text-align:center;
+    font-weight:bold;
+    font-size: 0.9rem;
+    background: white;
+    width:100%;
+}
+.table-wrapper {
+    overflow-x: auto;
+    margin: 0 -5px;
+    padding: 0 5px;
+    border-radius: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8fafc;
+    border-radius: 15px;
+    min-width: 650px;
+}
+th {
+    background: #2c3e50;
+    color: white;
+    padding: 10px 5px;
+    font-size: 0.75rem;
+}
+td {
+    padding: 8px 3px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.75rem;
+}
+td input[type=number] {
+    width: 50px;
+    padding: 6px 2px;
+    text-align: center;
+    font-size: 0.8rem;
+    border: 2px solid #3498db;
+    border-radius: 20px;
+}
+.total-row {
+    background: #d9e2ec;
+    font-weight: bold;
+}
+.verde {
+    background: #d4edda;
+    color: #155724;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 40px;
+}
+.rojo {
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 40px;
+}
+button {
+    padding: 15px 30px;
+    background: #ffc107;
+    border: none;
+    border-radius: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 15px auto;
+    font-size: 1.2rem;
+    width: calc(100% - 30px);
+    max-width: 300px;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+}
+button:active {
+    transform: scale(0.98);
+}
+.result {
+    background: #eef2f6;
+    padding: 15px;
+    border-radius: 20px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    text-align: left;
+}
+.result p {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.result span {
+    font-weight: bold;
+    color: #1e3c72;
+    background: #ffc107;
+    padding: 5px 15px;
+    border-radius: 30px;
+    display: inline-block;
+    margin: 2px;
+    font-size: 0.85rem;
+}
+.botones-historial {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+.botones-historial button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    margin: 0;
+    width: auto;
+    max-width: none;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    overflow-y: auto;
+}
+.modal-content {
+    background-color: white;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 20px;
+    width: 95%;
+    max-width: 950px;
+    color: black;
+    position: relative;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover {
+    color: black;
+}
+.historial-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.7rem;
+}
+.historial-tabla th,
+.historial-tabla td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: left;
+}
+.historial-tabla th {
+    background-color: #2c3e50;
+    color: white;
+}
+.historial-tabla tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+.eliminar-dia, .ver-semana {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    margin: 2px;
+}
+.ver-semana {
+    background-color: #28a745;
+}
+.eliminar-dia:hover {
+    background-color: #c82333;
+}
+.ver-semana:hover {
+    background-color: #218838;
+}
+.resumen-semanal {
+    background: #e9f0fc;
+    padding: 15px;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+.resumen-semanal h4 {
+    margin: 0 0 10px 0;
+    color: #1e3c72;
+    text-align: center;
+}
+.resumen-semanal table {
+    min-width: auto;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>📅 CONTROL PRODUCCIÓN - NORLAN GARCÍA</h2>
+
+<div class="fecha-bar">
+    <span>📆 Fecha:</span>
+    <input type="date" id="selectorFecha" value="">
+    <button onclick="cargarFecha()">📂 Cargar</button>
+    <button onclick="reiniciarDia()">🆕 Nuevo Día</button>
+</div>
+
+<div class="input-group">
+    <div><label>📦 Tareas totales:</label><input type="number" id="tareas" value="283"></div>
+    <div><label>🍽️ Desayuno (horas):</label><input type="number" id="desayuno" value="0.5" step="0.5"></div>
+    <div><label>⏰ Hora pedida:</label>
+        <select id="horaPedida">
+            <option value="10">10am</option><option value="11">11am</option>
+            <option value="12" selected>12pm</option><option value="13">1pm</option><option value="14">2pm</option>
+        </select>
+    </div>
+    <div><label>⏱️ Hora real:</label>
+        <select id="horaReal">
+            <option value="8">8am</option><option value="9">9am</option><option value="10">10am</option>
+            <option value="11" selected>11am</option><option value="12">12pm</option>
+            <option value="13">1pm</option><option value="14">2pm</option>
+        </select>
+    </div>
+    <div><label>⏱️ Minutos reales:</label>
+        <select id="minutosReal">
+            <option value="0">00</option><option value="15">15</option>
+            <option value="30" selected>30</option><option value="45">45</option>
+        </select>
+    </div>
+</div>
+
+<div class="table-wrapper">
+<table id="tablaProduccion">
+    <thead>
+        <tr style="background: #ffc107; color: #1e3c72; font-weight: bold;">
+            <td colspan="8" style="text-align: center; font-size: 1rem; padding: 8px;">👤 NORLAN GARCÍA</td>
+        </tr>
+        <tr><th>#</th><th>Hora</th><th>Meta</th><th>Real</th><th>M.Acum</th><th>R.Acum</th><th>Dif</th><th>Ritmo</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>1</td><td>6-8</td><td><input type="number" id="m1" value="80"></td><td><input type="number" id="r1" value="0"></td><td id="ma1">0</td><td id="ra1">0</td><td id="dif1" class="rojo">0</td><td id="ritmo1">-</td></tr>
+        <tr><td>2</td><td>8-10</td><td><input type="number" id="m2" value="80"></td><td><input type="number" id="r2" value="0"></td><td id="ma2">0</td><td id="ra2">0</td><td id="dif2" class="rojo">0</td><td id="ritmo2">-</td></tr>
+        <tr><td>3</td><td>10-12</td><td><input type="number" id="m3" value="80"></td><td><input type="number" id="r3" value="0"></td><td id="ma3">0</td><td id="ra3">0</td><td id="dif3" class="rojo">0</td><td id="ritmo3">-</td></tr>
+        <tr><td>4</td><td>12-14</td><td><input type="number" id="m4" value="43"></td><td><input type="number" id="r4" value="0"></td><td id="ma4">0</td><td id="ra4">0</td><td id="dif4" class="rojo">0</td><td id="ritmo4">-</td></tr>
+        <tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td id="metaTotal">283</td><td id="realTotal">0</td><td>-</td><td id="raFinal">0</td><td id="difTotal" class="rojo">0</td><td>-</td></tr>
+    </tbody>
+</table>
+</div>
+
+<div class="botones-historial">
+    <button onclick="guardarDia()">💾 Guardar este día</button>
+    <button onclick="verHistorial()">📜 Ver historial</button>
+    <button onclick="exportarDatos()">📤 Exportar respaldo</button>
+    <button onclick="importarDatos()">📥 Importar respaldo</button>
+    <button onclick="verResumenSemanal()">📆 Resumen Semanal</button>
+</div>
+
+<button onclick="calcular()">📊 CALCULAR AHORA</button>
+<div class="result" id="resultado"></div>
+
+<!-- Modal para historial -->
+<div id="historialModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModal()">&times;</span>
+        <h3>📋 Historial de días guardados</h3>
+        <div id="historialLista"></div>
+        <button onclick="verResumenSemanal()" style="margin-top:15px; padding:10px;">📆 Ver Resumen Semanal</button>
+    </div>
+</div>
+
+<!-- Modal para resumen semanal -->
+<div id="semanalModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarSemanalModal()">&times;</span>
+        <h3>📊 Resumen Semanal - Norlan García</h3>
+        <div id="resumenSemanal"></div>
+    </div>
+</div>
+
+<script>
+// ==================== FUNCIONES DE GUARDADO ====================
+function obtenerFechaActual() {
+    let hoy = new Date();
+    let año = hoy.getFullYear();
+    let mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    let dia = String(hoy.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${dia}`;
+}
+
+function obtenerSemana(fecha) {
+    let d = new Date(fecha);
+    let dia = d.getDay();
+    let inicioSemana = new Date(d);
+    inicioSemana.setDate(d.getDate() - (dia === 0 ? 6 : dia - 1));
+    let finSemana = new Date(inicioSemana);
+    finSemana.setDate(inicioSemana.getDate() + 6);
+    let año = inicioSemana.getFullYear();
+    let mes = String(inicioSemana.getMonth() + 1).padStart(2, '0');
+    let diaInicio = String(inicioSemana.getDate()).padStart(2, '0');
+    let mesFin = String(finSemana.getMonth() + 1).padStart(2, '0');
+    let diaFin = String(finSemana.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${diaInicio} / ${año}-${mesFin}-${diaFin}`;
+}
+
+function obtenerDatosActuales() {
+    return {
+        tareas: document.getElementById('tareas').value,
+        desayuno: document.getElementById('desayuno').value,
+        horaPedida: document.getElementById('horaPedida').value,
+        horaReal: document.getElementById('horaReal').value,
+        minutosReal: document.getElementById('minutosReal').value,
+        metas: [
+            document.getElementById('m1').value,
+            document.getElementById('m2').value,
+            document.getElementById('m3').value,
+            document.getElementById('m4').value
+        ],
+        reales: [
+            document.getElementById('r1').value,
+            document.getElementById('r2').value,
+            document.getElementById('r3').value,
+            document.getElementById('r4').value
+        ],
+        fechaGuardado: obtenerFechaActual()
+    };
+}
+
+function guardarDia() {
+    let fecha = document.getElementById('selectorFecha').value;
+    if (!fecha) {
+        fecha = obtenerFechaActual();
+        document.getElementById('selectorFecha').value = fecha;
+    }
+
+    let datos = obtenerDatosActuales();
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    historial[fecha] = datos;
+    localStorage.setItem('historialNorlan', JSON.stringify(historial));
+
+    alert(`✅ Datos guardados para el ${fecha}`);
+    calcular();
+}
+
+function cargarFecha() {
+    let fecha = document.getElementById('selectorFecha').value;
+    if (!fecha) {
+        alert('❌ Seleccioná una fecha');
+        return;
+    }
+
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    let datos = historial[fecha];
+
+    if (!datos) {
+        alert('❌ No hay datos guardados para esa fecha');
+        return;
+    }
+
+    document.getElementById('tareas').value = datos.tareas;
+    document.getElementById('desayuno').value = datos.desayuno;
+    document.getElementById('horaPedida').value = datos.horaPedida;
+    document.getElementById('horaReal').value = datos.horaReal;
+    document.getElementById('minutosReal').value = datos.minutosReal;
+
+    document.getElementById('m1').value = datos.metas[0];
+    document.getElementById('m2').value = datos.metas[1];
+    document.getElementById('m3').value = datos.metas[2];
+    document.getElementById('m4').value = datos.metas[3];
+
+    document.getElementById('r1').value = datos.reales[0];
+    document.getElementById('r2').value = datos.reales[1];
+    document.getElementById('r3').value = datos.reales[2];
+    document.getElementById('r4').value = datos.reales[3];
+
+    calcular();
+    alert(`✅ Datos cargados para ${fecha}`);
+}
+
+function reiniciarDia() {
+    if (confirm('¿Crear nuevo día? Los datos actuales se perderán si no los guardaste.')) {
+        document.getElementById('tareas').value = '283';
+        document.getElementById('desayuno').value = '0.5';
+        document.getElementById('horaPedida').value = '12';
+        document.getElementById('horaReal').value = '11';
+        document.getElementById('minutosReal').value = '30';
+
+        document.getElementById('m1').value = '80';
+        document.getElementById('m2').value = '80';
+        document.getElementById('m3').value = '80';
+        document.getElementById('m4').value = '43';
+
+        document.getElementById('r1').value = '0';
+        document.getElementById('r2').value = '0';
+        document.getElementById('r3').value = '0';
+        document.getElementById('r4').value = '0';
+
+        let hoy = obtenerFechaActual();
+        document.getElementById('selectorFecha').value = hoy;
+
+        calcular();
+    }
+}
+
+function eliminarDia(fecha) {
+    if (confirm(`¿Eliminar los datos del día ${fecha}?`)) {
+        let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+        delete historial[fecha];
+        localStorage.setItem('historialNorlan', JSON.stringify(historial));
+        verHistorial();
+        alert(`✅ Día ${fecha} eliminado`);
+    }
+}
+
+function verHistorial() {
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    let fechas = Object.keys(historial).sort().reverse();
+    let modal = document.getElementById('historialModal');
+    let lista = document.getElementById('historialLista');
+
+    if (fechas.length === 0) {
+        lista.innerHTML = '<p>📭 No hay días guardados aún.</p>';
+    } else {
+        let html = `<table class="historial-tabla">
+            <thead>
+                <tr><th>Fecha</th><th>Tareas Totales</th><th>Hora Pedida</th><th>Hora Real</th><th>Meta Total</th><th>Real Total</th><th>Dif Total</th><th>Acción</th></tr>
+            </thead>
+            <tbody>`;
+        
+        fechas.forEach(fecha => {
+            let datos = historial[fecha];
+            let metaTotal = (parseFloat(datos.metas[0] || 0) + parseFloat(datos.metas[1] || 0) + 
+                            parseFloat(datos.metas[2] || 0) + parseFloat(datos.metas[3] || 0));
+            let realTotal = (parseFloat(datos.reales[0] || 0) + parseFloat(datos.reales[1] || 0) + 
+                            parseFloat(datos.reales[2] || 0) + parseFloat(datos.reales[3] || 0));
+            let diferencia = realTotal - metaTotal;
+            let difColor = diferencia >= 0 ? 'verde' : 'rojo';
+            
+            html += `<tr>
+                <td>${fecha}</td>
+                <td>${datos.tareas}</td>
+                <td>${datos.horaPedida}:00</td>
+                <td>${datos.horaReal}:${String(datos.minutosReal).padStart(2,'0')}</td>
+                <td>${metaTotal}</td>
+                <td>${realTotal}</td>
+                <td class="${difColor}">${diferencia >= 0 ? '+' : ''}${diferencia}</td>
+                <td><button class="eliminar-dia" onclick="eliminarDia('${fecha}')">🗑️ Eliminar</button></td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table><br><p><small>💡 Tip: Usa "Exportar respaldo" para guardar copia de seguridad</small></p>`;
+        lista.innerHTML = html;
+    }
+    modal.style.display = "block";
+}
+
+function verResumenSemanal() {
+    let historial = JSON.parse(localStorage.getItem('historialNorlan') || '{}');
+    let fechas = Object.keys(historial).sort();
+    
+    if (fechas.length === 0) {
+        alert('📭 No hay días guardados aún.');
+        return;
+    }
+    
+    // Agrupar por semana
+    let semanas = {};
+    fechas.forEach(fecha => {
+        let semana = obtenerSemana(fecha);
+        if (!semanas[semana]) {
+            semanas[semana] = { fechas: [], metaTotal: 0, realTotal: 0, dias: 0 };
+        }
+        let datos = historial[fecha];
+        let metaTotal = (parseFloat(datos.metas[0] || 0) + parseFloat(datos.metas[1] || 0) + 
+                        parseFloat(datos.metas[2] || 0) + parseFloat(datos.metas[3] || 0));
+        let realTotal = (parseFloat(datos.reales[0] || 0) + parseFloat(datos.reales[1] || 0) + 
+                        parseFloat(datos.reales[2] || 0) + parseFloat(datos.reales[3] || 0));
+        semanas[semana].fechas.push(fecha);
+        semanas[semana].metaTotal += metaTotal;
+        semanas[semana].realTotal += realTotal;
+        semanas[semana].dias++;
+    });
+    
+    let html = `<table class="historial-tabla">
+        <thead>
+            <tr><th>Semana</th><th>Días</th><th>Meta Total</th><th>Real Total</th><th>Diferencia</th><th>Productividad</th></tr>
+        </thead>
+        <tbody>`;
+    
+    for (let semana in semanas) {
+        let s = semanas[semana];
+        let diferencia = s.realTotal - s.metaTotal;
+        let productividad = s.metaTotal > 0 ? (s.realTotal / s.metaTotal) * 100 : 0;
+        let difColor = diferencia >= 0 ? 'verde' : 'rojo';
+        
+        html += `<tr>
+            <td>${semana}</td>
+            <td>${s.dias}</td>
+            <td>${s.metaTotal}</td>
+            <td>${s.realTotal}</td>
+            <td class="${difColor}">${diferencia >= 0 ? '+' : ''}${diferencia}</td>
+            <td><span class="${productividad >= 100 ? 'verde' : 'rojo'}">${productividad.toFixed(1)}%</span></td>
+        </tr>`;
+    }
+    
+    html += `</tbody></table>`;
+    document.getElementById('resumenSemanal').innerHTML = html;
+    document.getElementById('semanalModal').style.display = "block";
+}
+
+function cerrarModal() {
+    document.getElementById('historialModal').style.display = "none";
+}
+
+function cerrarSemanalModal() {
+    document.getElementById('semanalModal').style.display = "none";
+}
+
+function exportarDatos() {
+    let historial = localStorage.getItem('historialNorlan');
+    if (!historial || historial === '{}') {
+        alert('📭 No hay datos para exportar');
+        return;
+    }
+    
+    let blob = new Blob([historial], {type: 'application/json'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `respaldo_norlan_${obtenerFechaActual()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('✅ Datos exportados exitosamente');
+}
+
+function importarDatos() {
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = function(e) {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                let datos = JSON.parse(evt.target.result);
+                localStorage.setItem('historialNorlan', JSON.stringify(datos));
+                alert('✅ Datos importados exitosamente');
+                verHistorial();
+            } catch(err) {
+                alert('❌ Error al importar: archivo inválido');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// ==================== FUNCIÓN DE CÁLCULO (CON SUMATORIA CORRECTA) ====================
+function calcular() {
+    // Obtener valores de metas
+    let m1 = parseFloat(document.getElementById("m1").value) || 0;
+    let m2 = parseFloat(document.getElementById("m2").value) || 0;
+    let m3 = parseFloat(document.getElementById("m3").value) || 0;
+    let m4 = parseFloat(document.getElementById("m4").value) || 0;
+    
+    // Obtener valores reales
+    let r1 = parseFloat(document.getElementById("r1").value) || 0;
+    let r2 = parseFloat(document.getElementById("r2").value) || 0;
+    let r3 = parseFloat(document.getElementById("r3").value) || 0;
+    let r4 = parseFloat(document.getElementById("r4").value) || 0;
+    
+    // ACUMULADOS - SUMA CORRECTA
+    let ma1 = m1;
+    let ma2 = m1 + m2;
+    let ma3 = m1 + m2 + m3;
+    let ma4 = m1 + m2 + m3 + m4;
+    
+    let ra1 = r1;
+    let ra2 = r1 + r2;
+    let ra3 = r1 + r2 + r3;
+    let ra4 = r1 + r2 + r3 + r4;
+    
+    // Actualizar celdas
+    document.getElementById("ma1").innerText = ma1;
+    document.getElementById("ma2").innerText = ma2;
+    document.getElementById("ma3").innerText = ma3;
+    document.getElementById("ma4").innerText = ma4;
+    
+    document.getElementById("ra1").innerText = ra1;
+    document.getElementById("ra2").innerText = ra2;
+    document.getElementById("ra3").innerText = ra3;
+    document.getElementById("ra4").innerText = ra4;
+    
+    document.getElementById("metaTotal").innerText = ma4;
+    document.getElementById("realTotal").innerText = ra4;
+    document.getElementById("raFinal").innerText = ra4;
+    
+    // Diferencias
+    let d1 = ra1 - ma1;
+    let d2 = ra2 - ma2;
+    let d3 = ra3 - ma3;
+    let d4 = ra4 - ma4;
+    
+    function setDif(id, val) {
+        let el = document.getElementById(id);
+        el.innerText = (val >= 0 ? '+' : '') + val;
+        el.className = val >= 0 ? 'verde' : 'rojo';
+    }
+    setDif('dif1', d1);
+    setDif('dif2', d2);
+    setDif('dif3', d3);
+    setDif('dif4', d4);
+    setDif('difTotal', d4);
+    
+    // Ritmos
+    document.getElementById("ritmo1").innerText = (ma1 / 2).toFixed(1) + 't';
+    document.getElementById("ritmo2").innerText = ((ma2 - ma1) / 2).toFixed(1) + 't';
+    document.getElementById("ritmo3").innerText = ((ma3 - ma2) / 2).toFixed(1) + 't';
+    document.getElementById("ritmo4").innerText = ((ma4 - ma3) / 2).toFixed(1) + 't';
+    
+    // Cálculo de incentivo
+    let tareasTotales = parseFloat(document.getElementById("tareas").value) || 0;
+    let horaPedida = parseInt(document.getElementById("horaPedida").value);
+    let horaReal = parseInt(document.getElementById("horaReal").value);
+    let minutosReal = parseInt(document.getElementById("minutosReal").value) || 0;
+    let desayuno = parseFloat(document.getElementById("desayuno").value) || 0;
+    let almuerzo = 0.5;
+    
+    let horasBase;
+    if (horaPedida === 14) {
+        horasBase = horaPedida - 6 - desayuno - almuerzo;
+    } else {
+        horasBase = horaPedida - 6 - desayuno;
+    }
+    horasBase = Math.max(0, horasBase);
+    
+    let horasReales;
+    if (horaReal >= 12) {
+        horasReales = horaReal - 6 - desayuno - almuerzo + minutosReal / 60;
+    } else {
+        horasReales = horaReal - 6 - desayuno + minutosReal / 60;
+    }
+    horasReales = Math.max(0, horasReales);
+    
+    let ritmoBase = horasBase > 0 ? tareasTotales / horasBase : 0;
+    let ritmoReal = horasReales > 0 ? ra4 / horasReales : 0;
+    
+    let diffHoras = horasBase - horasReales;
+    let productividad = ritmoBase > 0 ? (ritmoReal / ritmoBase) * 100 : 0;
+    
+    let rango = "", incentivo = 0;
+    if (productividad >= 130) { rango = "130% o más"; incentivo = 3150; }
+    else if (productividad >= 120) { rango = "120-129.99%"; incentivo = 3000; }
+    else if (productividad >= 110) { rango = "110-119.99%"; incentivo = 2850; }
+    else if (productividad >= 100) { rango = "100-109.99%"; incentivo = 2700; }
+    else if (productividad >= 90) { rango = "90-99.99%"; incentivo = 2400; }
+    else if (productividad >= 80) { rango = "80-89.99%"; incentivo = 2100; }
+    else { rango = "<80%"; incentivo = 0; }
+    
+    document.getElementById("resultado").innerHTML = `
+        <p><strong>📊 NORLAN GARCÍA - RESUMEN DE PRODUCCIÓN</strong></p>
+        <p>🎯 Meta total: ${ma4} tareas | ✅ Real total: ${ra4} tareas | 📉 Diferencia: ${d4 >= 0 ? '+' : ''}${d4}</p>
+        <p>⏳ Horas base: ${horasBase.toFixed(2)}h | Ritmo base: ${ritmoBase.toFixed(2)} t/h</p>
+        <p>⏱️ Tus horas: ${horasReales.toFixed(2)}h | Ritmo real: ${ritmoReal.toFixed(2)} t/h</p>
+        <p>📈 Productividad: <span>${productividad.toFixed(1)}%</span></p>
+        <p>🎯 Rango: <span>${rango}</span> | 💰 Incentivo: <span>C$${incentivo}</span></p>
+    `;
+}
+
+// ==================== INICIALIZACIÓN ====================
+document.querySelectorAll("input, select").forEach(el => el.addEventListener("input", calcular));
+document.getElementById('selectorFecha').value = obtenerFechaActual();
+calcular();
+
+window.onclick = function(event) {
+    let modal = document.getElementById('historialModal');
+    let modalSemanal = document.getElementById('semanalModal');
+    if (event.target == modal) modal.style.display = "none";
+    if (event.target == modalSemanal) modalSemanal.style.display = "none";
+}
+</script>
+</body>
+</html>
+<script>
+const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+let timeoutGuardado = null;
+
+function mostrarToast() {
+    let toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+}
+
+function obtenerInicioSemana(fecha) {
+    let fechaObj = new Date(fecha);
+    let dia = fechaObj.getDay();
+    let diff = (dia === 0 ? 6 : dia - 1);
+    fechaObj.setDate(fechaObj.getDate() - diff);
+    return fechaObj;
+}
+
+function formatearFecha(fecha) {
+    let año = fecha.getFullYear();
+    let mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    let dia = String(fecha.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${dia}`;
+}
+
+function obtenerFechaActual() {
+    let hoy = new Date();
+    return formatearFecha(hoy);
+}
+
+function obtenerFechasSemana() {
+    let inicioInput = document.getElementById('semanaInicio').value;
+    let inicio;
+    if (inicioInput) {
+        inicio = new Date(inicioInput);
+    } else {
+        inicio = obtenerInicioSemana(new Date());
+    }
+    let fechas = [];
+    for (let i = 0; i < 6; i++) {
+        let fecha = new Date(inicio);
+        fecha.setDate(inicio.getDate() + i);
+        fechas.push(formatearFecha(fecha));
+    }
+    return fechas;
+}
+
+function obtenerDatosPorDefecto() {
+    return {
+        tareas: 283,
+        desayuno: 0.5,
+        horaPedida: 12,
+        horaReal: 11,
+        minutosReal: 30,
+        metas: [80, 80, 80, 43],
+        reales: [0, 0, 0, 0]
+    };
+}
+
+function calcularDiaCompleto(datos) {
+    let tareas = parseFloat(datos.tareas) || 0;
+    let horaPedida = parseInt(datos.horaPedida);
+    let horaReal = parseInt(datos.horaReal);
+    let minutosReal = parseInt(datos.minutosReal) || 0;
+    let desayuno = parseFloat(datos.desayuno) || 0;
+    let almuerzo = 0.5;
+    
+    let m1 = parseFloat(datos.metas[0]) || 0;
+    let m2 = parseFloat(datos.metas[1]) || 0;
+    let m3 = parseFloat(datos.metas[2]) || 0;
+    let m4 = parseFloat(datos.metas[3]) || 0;
+    
+    let r1 = parseFloat(datos.reales[0]) || 0;
+    let r2 = parseFloat(datos.reales[1]) || 0;
+    let r3 = parseFloat(datos.reales[2]) || 0;
+    let r4 = parseFloat(datos.reales[3]) || 0;
+    
+    let ma1 = m1, ma2 = m1 + m2, ma3 = m1 + m2 + m3, ma4 = m1 + m2 + m3 + m4;
+    let ra1 = r1, ra2 = r1 + r2, ra3 = r1 + r2 + r3, ra4 = r1 + r2 + r3 + r4;
+    let d1 = ra1 - ma1, d2 = ra2 - ma2, d3 = ra3 - ma3, d4 = ra4 - ma4;
+    let ritmo1 = (ma1 / 2).toFixed(1), ritmo2 = ((ma2 - ma1) / 2).toFixed(1);
+    let ritmo3 = ((ma3 - ma2) / 2).toFixed(1), ritmo4 = ((ma4 - ma3) / 2).toFixed(1);
+    
+    let horasBase = (horaPedida === 14) ? horaPedida - 6 - desayuno - almuerzo : horaPedida - 6 - desayuno;
+    horasBase = Math.max(0, horasBase);
+    
+    let horasReales = (horaReal >= 12) ? horaReal - 6 - desayuno - almuerzo + minutosReal / 60 : horaReal - 6 - desayuno + minutosReal / 60;
+    horasReales = Math.max(0, horasReales);
+    
+    let ritmoBase = horasBase > 0 ? tareas / horasBase : 0;
+    let ritmoReal = horasReales > 0 ? ra4 / horasReales : 0;
+    let productividad = ritmoBase > 0 ? (ritmoReal / ritmoBase) * 100 : 0;
+    
+    let rango = "", incentivo = 0;
+    if (productividad >= 130) { rango = "130% o más"; incentivo = 3150; }
+    else if (productividad >= 120) { rango = "120-129.99%"; incentivo = 3000; }
+    else if (productividad >= 110) { rango = "110-119.99%"; incentivo = 2850; }
+    else if (productividad >= 100) { rango = "100-109.99%"; incentivo = 2700; }
+    else if (productividad >= 90) { rango = "90-99.99%"; incentivo = 2400; }
+    else if (productividad >= 80) { rango = "80-89.99%"; incentivo = 2100; }
+    else { rango = "<80%"; incentivo = 0; }
+    
+    return { ma1, ma2, ma3, ma4, ra1, ra2, ra3, ra4, d1, d2, d3, d4, ritmo1, ritmo2, ritmo3, ritmo4, productividad, rango, incentivo, realAcumulado: ra4, ritmoReal, horasReales, horasBase, ritmoBase };
+}
+
+function renderTablaDia(index, datos) {
+    let calc = calcularDiaCompleto(datos);
+    return `<div class="table-wrapper"><table><thead><tr style="background:#ffc107;color:#1e3c72;"><td colspan="8" style="text-align:center;padding:8px;">👤 NORLAN GARCÍA</td></tr><tr><th>#</th><th>Hora</th><th>Meta</th><th>Real</th><th>M.Acum</th><th>R.Acum</th><th>Dif</th><th>Ritmo</th></tr></thead><tbody>
+    <tr><td>1</td><td>6-8</td><td><input type="number" class="m1-${index}" value="${datos.metas[0]}"></td><td><input type="number" class="r1-${index}" value="${datos.reales[0]}"></td><td id="ma1-${index}">${calc.ma1}</td><td id="ra1-${index}">${calc.ra1}</td><td id="dif1-${index}" class="${calc.d1 >= 0 ? 'verde' : 'rojo'}">${calc.d1 >= 0 ? '+' : ''}${calc.d1}</td><td id="ritmo1-${index}">${calc.ritmo1}t</td></tr>
+    <tr><td>2</td><td>8-10</td><td><input type="number" class="m2-${index}" value="${datos.metas[1]}"></td><td><input type="number" class="r2-${index}" value="${datos.reales[1]}"></td><td id="ma2-${index}">${calc.ma2}</td><td id="ra2-${index}">${calc.ra2}</td><td id="dif2-${index}" class="${calc.d2 >= 0 ? 'verde' : 'rojo'}">${calc.d2 >= 0 ? '+' : ''}${calc.d2}</td><td id="ritmo2-${index}">${calc.ritmo2}t</td></tr>
+    <tr><td>3</td><td>10-12</td><td><input type="number" class="m3-${index}" value="${datos.metas[2]}"></td><td><input type="number" class="r3-${index}" value="${datos.reales[2]}"></td><td id="ma3-${index}">${calc.ma3}</td><td id="ra3-${index}">${calc.ra3}</td><td id="dif3-${index}" class="${calc.d3 >= 0 ? 'verde' : 'rojo'}">${calc.d3 >= 0 ? '+' : ''}${calc.d3}</td><td id="ritmo3-${index}">${calc.ritmo3}t</td></tr>
+    <tr><td>4</td><td>12-14</td><td><input type="number" class="m4-${index}" value="${datos.metas[3]}"></td><td><input type="number" class="r4-${index}" value="${datos.reales[3]}"></td><td id="ma4-${index}">${calc.ma4}</td><td id="ra4-${index}">${calc.ra4}</td><td id="dif4-${index}" class="${calc.d4 >= 0 ? 'verde' : 'rojo'}">${calc.d4 >= 0 ? '+' : ''}${calc.d4}</td><td id="ritmo4-${index}">${calc.ritmo4}t</td></tr>
+    <tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td id="metaTotal-${index}">${calc.ma4}</td><td id="realTotal-${index}">${calc.ra4}</td><td>-</td><td id="raFinal-${index}">${calc.ra4}</td><td id="difTotal-${index}" class="${calc.d4 >= 0 ? 'verde' : 'rojo'}">${calc.d4 >= 0 ? '+' : ''}${calc.d4}</td><td>-</td></tr>
+    </tbody></table></div>`;
+}
+  function renderDia(dia, fecha, datos, index, isActive) {
+    let calc = calcularDiaCompleto(datos);
+    return `<div class="dia-semana ${isActive ? 'activo' : ''}" onclick="toggleDia(${index})">
+        <div class="dia-titulo"><strong>${dia} ${fecha}</strong><div class="dia-stats"><span>📈 ${calc.productividad.toFixed(1)}%</span><span>🎯 ${calc.rango}</span><span>💰 C$${calc.incentivo}</span></div></div>
+        <div class="dia-contenido" id="contenido-${index}">
+            <div class="input-group">
+                <div><label>📦 Tareas totales:</label><input type="number" class="tareas-${index}" value="${datos.tareas}"></div>
+                <div><label>🍽️ Desayuno (horas):</label><input type="number" class="desayuno-${index}" value="${datos.desayuno}" step="0.5"></div>
+                <div><label>⏰ Hora pedida:</label><select class="horaPedida-${index}">${[10,11,12,13,14].map(h => `<option value="${h}" ${datos.horaPedida == h ? 'selected' : ''}>${h}${h<12?'am':'pm'}</option>`).join('')}</select></div>
+                <div><label>⏱️ Hora real:</label><select class="horaReal-${index}">${[8,9,10,11,12,13,14].map(h => `<option value="${h}" ${datos.horaReal == h ? 'selected' : ''}>${h}${h<12?'am':'pm'}</option>`).join('')}</select></div>
+                <div><label>⏱️ Minutos reales:</label><select class="minutosReal-${index}">${[0,15,30,45].map(m => `<option value="${m}" ${datos.minutosReal == m ? 'selected' : ''}>${m.toString().padStart(2,'0')}</option>`).join('')}</select></div>
+            </div>
+            ${renderTablaDia(index, datos)}
+            <div class="result-dia" id="resultado-${index}"><p>⏳ Horas base: <span>${calc.horasBase.toFixed(2)}h</span> | Ritmo base: <span>${calc.ritmoBase.toFixed(2)} t/h</span></p><p>⏱️ Tus horas: <span>${calc.horasReales.toFixed(2)}h</span> | Ritmo real: <span>${calc.ritmoReal.toFixed(2)} t/h</span></p><p>📈 Productividad: <span>${calc.productividad.toFixed(1)}%</span></p><p>🎯 Rango: <span>${calc.rango}</span> | 💰 Incentivo: <span>C$${calc.incentivo}</span></p></div>
+        </div>
+    </div>`;
+}
+
+function obtenerDatosDelDia(index) {
+    return {
+        tareas: document.querySelector(`.tareas-${index}`)?.value || 283,
+        desayuno: document.querySelector(`.desayuno-${index}`)?.value || 0.5,
+        horaPedida: document.querySelector(`.horaPedida-${index}`)?.value || 12,
+        horaReal: document.querySelector(`.horaReal-${index}`)?.value || 11,
+        minutosReal: document.querySelector(`.minutosReal-${index}`)?.value || 30,
+        metas: [document.querySelector(`.m1-${index}`)?.value || 0, document.querySelector(`.m2-${index}`)?.value || 0, document.querySelector(`.m3-${index}`)?.value || 0, document.querySelector(`.m4-${index}`)?.value || 0],
+        reales: [document.querySelector(`.r1-${index}`)?.value || 0, document.querySelector(`.r2-${index}`)?.value || 0, document.querySelector(`.r3-${index}`)?.value || 0, document.querySelector(`.r4-${index}`)?.value || 0]
+    };
+}
+
+function actualizarTodoDia(index) {
+    let datos = obtenerDatosDelDia(index);
+    let calc = calcularDiaCompleto(datos);
+    document.getElementById(`ma1-${index}`).innerText = calc.ma1; document.getElementById(`ma2-${index}`).innerText = calc.ma2;
+    document.getElementById(`ma3-${index}`).innerText = calc.ma3; document.getElementById(`ma4-${index}`).innerText = calc.ma4;
+    document.getElementById(`ra1-${index}`).innerText = calc.ra1; document.getElementById(`ra2-${index}`).innerText = calc.ra2;
+    document.getElementById(`ra3-${index}`).innerText = calc.ra3; document.getElementById(`ra4-${index}`).innerText = calc.ra4;
+    document.getElementById(`metaTotal-${index}`).innerText = calc.ma4; document.getElementById(`realTotal-${index}`).innerText = calc.ra4;
+    document.getElementById(`raFinal-${index}`).innerText = calc.ra4;
+    function actualizarDif(id, val) { let el = document.getElementById(id); el.innerText = (val >= 0 ? '+' : '') + val; el.className = val >= 0 ? 'verde' : 'rojo'; }
+    actualizarDif(`dif1-${index}`, calc.d1); actualizarDif(`dif2-${index}`, calc.d2); actualizarDif(`dif3-${index}`, calc.d3);
+    actualizarDif(`dif4-${index}`, calc.d4); actualizarDif(`difTotal-${index}`, calc.d4);
+    document.getElementById(`ritmo1-${index}`).innerText = calc.ritmo1 + 't'; document.getElementById(`ritmo2-${index}`).innerText = calc.ritmo2 + 't';
+    document.getElementById(`ritmo3-${index}`).innerText = calc.ritmo3 + 't'; document.getElementById(`ritmo4-${index}`).innerText = calc.ritmo4 + 't';
+    let divResultado = document.getElementById(`resultado-${index}`);
+    if (divResultado) { divResultado.innerHTML = `<p>⏳ Horas base: <span>${calc.horasBase.toFixed(2)}h</span> | Ritmo base: <span>${calc.ritmoBase.toFixed(2)} t/h</span></p><p>⏱️ Tus horas: <span>${calc.horasReales.toFixed(2)}h</span> | Ritmo real: <span>${calc.ritmoReal.toFixed(2)} t/h</span></p><p>📈 Productividad: <span>${calc.productividad.toFixed(1)}%</span></p><p>🎯 Rango: <span>${calc.rango}</span> | 💰 Incentivo: <span>C$${calc.incentivo}</span></p>`; }
+    let diaDiv = document.querySelectorAll('.dia-semana')[index];
+    if (diaDiv) { let statsDiv = diaDiv.querySelector('.dia-stats'); if (statsDiv) { statsDiv.innerHTML = `<span>📈 ${calc.productividad.toFixed(1)}%</span><span>🎯 ${calc.rango}</span><span>💰 C$${calc.incentivo}</span>`; } }
+    renderResumenSemanal();
+    guardarSemanaAuto();
+}
+
+function guardarSemanaAuto() {
+    if (timeoutGuardado) clearTimeout(timeoutGuardado);
+    timeoutGuardado = setTimeout(() => {
+        let semanaKey = document.getElementById('semanaInicio').value;
+        if (!semanaKey) return;
+        let fechas = obtenerFechasSemana();
+        let semana = {};
+        for (let i = 0; i < 6; i++) { semana[fechas[i]] = obtenerDatosDelDia(i); }
+        let todasSemanas = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+        todasSemanas[semanaKey] = semana;
+        localStorage.setItem('semanasNorlan', JSON.stringify(todasSemanas));
+        mostrarToast();
+    }, 500);
+}
+
+function cargarSemana() {
+    let semanaKey = document.getElementById('semanaInicio').value;
+    if (!semanaKey) { alert('❌ Seleccione una fecha'); return; }
+    let todasSemanas = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+    let semana = todasSemanas[semanaKey];
+    if (!semana) { alert('❌ No hay datos'); return; }
+    let fechas = obtenerFechasSemana();
+    for (let i = 0; i < 6; i++) {
+        let fecha = fechas[i];
+        let datos = semana[fecha];
+        if (datos && document.querySelector(`.tareas-${i}`)) {
+            document.querySelector(`.tareas-${i}`).value = datos.tareas;
+            document.querySelector(`.desayuno-${i}`).value = datos.desayuno;
+            document.querySelector(`.horaPedida-${i}`).value = datos.horaPedida;
+            document.querySelector(`.horaReal-${i}`).value = datos.horaReal;
+            document.querySelector(`.minutosReal-${i}`).value = datos.minutosReal;
+            document.querySelector(`.m1-${i}`).value = datos.metas[0];
+            document.querySelector(`.m2-${i}`).value = datos.metas[1];
+            document.querySelector(`.m3-${i}`).value = datos.metas[2];
+            document.querySelector(`.m4-${i}`).value = datos.metas[3];
+            document.querySelector(`.r1-${i}`).value = datos.reales[0];
+            document.querySelector(`.r2-${i}`).value = datos.reales[1];
+            document.querySelector(`.r3-${i}`).value = datos.reales[2];
+            document.querySelector(`.r4-${i}`).value = datos.reales[3];
+            actualizarTodoDia(i);
+        }
+    }
+    alert('✅ Semana cargada');
+}
+
+function nuevaSemana() {
+    if (confirm('¿Crear nueva semana?')) {
+        let hoy = new Date();
+        let inicioSemana = obtenerInicioSemana(hoy);
+        document.getElementById('semanaInicio').value = formatearFecha(inicioSemana);
+        renderizarSemana();
+    }
+}
+
+function exportarSemana() {
+    let todasSemanas = localStorage.getItem('semanasNorlan');
+    if (!todasSemanas || todasSemanas === '{}') { alert('No hay datos'); return; }
+    let blob = new Blob([todasSemanas], {type: 'application/json'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `respaldo_norlan_${obtenerFechaActual()}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('✅ Exportado');
+}
+
+function importarSemana() {
+    let input = document.createElement('input');
+    input.type = 'file'; input.accept = 'application/json';
+    input.onchange = function(e) {
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                let datos = JSON.parse(evt.target.result);
+                localStorage.setItem('semanasNorlan', JSON.stringify(datos));
+                alert('✅ Importado');
+                renderizarSemana();
+            } catch(err) { alert('Error'); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function verHistorialSemanas() {
+    let todasSemanas = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+    let semanas = Object.keys(todasSemanas).sort().reverse();
+    let lista = document.getElementById('historialLista');
+    let modal = document.getElementById('historialModal');
+    if (semanas.length === 0) { lista.innerHTML = '<p>📭 No hay semanas</p>'; }
+    else {
+        let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#2c3e50;color:white;"><th>Semana</th><th>Días</th><th>Acción</th></tr></thead><tbody>';
+        semanas.forEach(semana => {
+            let numDias = Object.keys(todasSemanas[semana]).length;
+            html += `<tr><td>${semana}</td><td>${numDias} días</td><td><button onclick="cargarSemanaEspecifica(\'${semana}\')" style="padding:5px 10px;">📂 Cargar</button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        lista.innerHTML = html;
+    }
+    modal.style.display = 'block';
+}
+
+function cargarSemanaEspecifica(semanaKey) {
+    document.getElementById('semanaInicio').value = semanaKey;
+    cerrarModal();
+    cargarSemana();
+}
+
+function cerrarModal() { document.getElementById('historialModal').style.display = 'none'; }
+
+function renderResumenSemanal() {
+    let semana = {};
+    let fechas = obtenerFechasSemana();
+    for (let i = 0; i < 6; i++) { semana[fechas[i]] = obtenerDatosDelDia(i); }
+    let totalIncentivo = 0, totalReal = 0, totalMeta = 0;
+    let html = '<h3>📊 RESUMEN SEMANAL</h3><table style="width:100%"><thead><tr><th>Día</th><th>Fecha</th><th>Meta</th><th>Real</th><th>Productividad</th><th>Rango</th><th>Incentivo</th></tr></thead><tbody>';
+    for (let i = 0; i < 6; i++) {
+        let resultado = calcularDiaCompleto(semana[fechas[i]]);
+        let metaTotal = (parseFloat(semana[fechas[i]].metas[0]||0) + parseFloat(semana[fechas[i]].metas[1]||0) + parseFloat(semana[fechas[i]].metas[2]||0) + parseFloat(semana[fechas[i]].metas[3]||0));
+        totalIncentivo += resultado.incentivo;
+        totalReal += resultado.realAcumulado;
+        totalMeta += metaTotal;
+        html += `<tr><td><strong>${DIAS[i]}</strong></td><td>${fechas[i]}</td><td>${metaTotal}</td><td>${resultado.realAcumulado}</td><td class="${resultado.productividad >= 100 ? 'verde' : 'rojo'}">${resultado.productividad.toFixed(1)}%</td><td>${resultado.rango}</td><td><strong>C$${resultado.incentivo}</strong></td></tr>`;
+    }
+    let productividadSemanal = totalMeta > 0 ? (totalReal / totalMeta) * 100 : 0;
+    html += `</tbody></table><div class="total-semanal">📊 TOTAL SEMANA: Meta: ${totalMeta} | Real: ${totalReal} | Diferencia: ${(totalReal - totalMeta) >= 0 ? '+' : ''}${(totalReal - totalMeta)}<br>💰 INCENTIVO TOTAL: C$${totalIncentivo}<br>📈 PRODUCTIVIDAD SEMANAL: <span class="${productividadSemanal >= 100 ? 'verde' : 'rojo'}">${productividadSemanal.toFixed(1)}%</span></div>`;
+    document.getElementById('resumenSemanal').innerHTML = html;
+}
+
+function renderizarSemana() {
+    let fechas = obtenerFechasSemana();
+    let semanaGuardada = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+    let semanaActual = semanaGuardada[document.getElementById('semanaInicio').value] || {};
+    let html = '';
+    for (let i = 0; i < 6; i++) {
+        let fecha = fechas[i];
+        let datos = semanaActual[fecha] || obtenerDatosPorDefecto();
+        html += renderDia(DIAS[i], fecha, datos, i, i === 0);
+    }
+    document.getElementById('diasContainer').innerHTML = html;
+    for (let i = 0; i < 6; i++) {
+        let inputs = document.querySelectorAll(`[class*="-${i}"]`);
+        inputs.forEach(input => {
+            input.addEventListener('input', () => actualizarTodoDia(i));
+            input.addEventListener('change', () => actualizarTodoDia(i));
+        });
+    }
+    renderResumenSemanal();
+}
+
+function toggleDia(index) {
+    let contenidos = document.querySelectorAll('.dia-contenido');
+    let dias = document.querySelectorAll('.dia-semana');
+    contenidos.forEach(c => c.classList.remove('activo'));
+    dias.forEach(d => d.classList.remove('activo'));
+    document.getElementById(`contenido-${index}`).classList.add('activo');
+    dias[index].classList.add('activo');
+}
+
+let hoy = new Date();
+let inicioSemana = obtenerInicioSemana(hoy);
+document.getElementById('semanaInicio').value = formatearFecha(inicioSemana);
+renderizarSemana();
+</script>
+</body>
+</html>
