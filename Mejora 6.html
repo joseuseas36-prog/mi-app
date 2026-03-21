@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>📅 Control Semanal - Norlan García (Guardado Automático)</title>
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #1e2a3a;
+    padding: 10px;
+    margin: 0;
+    color: white;
+    min-height: 100vh;
+}
+.container {
+    background: white;
+    color: black;
+    padding: 15px;
+    border-radius: 25px;
+    max-width: 100%;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+}
+h2, h3 {
+    color: #1e3c72;
+    margin: 5px 0 15px 0;
+    text-align: center;
+}
+h2 { font-size: 1.3rem; }
+h3 { font-size: 1.1rem; }
+.fecha-bar {
+    background: #ffc107;
+    padding: 8px 15px;
+    border-radius: 40px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.fecha-bar button, .fecha-bar input {
+    padding: 8px 15px;
+    border-radius: 30px;
+    border: none;
+    font-weight: bold;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.fecha-bar input {
+    cursor: text;
+}
+.auto-save-badge {
+    background: #28a745;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.dia-semana {
+    background: #e9f0fc;
+    padding: 12px;
+    border-radius: 15px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+.dia-semana:hover {
+    background: #d4e4fc;
+    transform: translateX(5px);
+}
+.dia-semana.activo {
+    border-color: #ffc107;
+    background: #fff3e0;
+}
+.dia-titulo {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #1e3c72;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.dia-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.75rem;
+    color: #2c3e50;
+}
+.dia-stats span {
+    background: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+.dia-contenido {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid #3498db;
+}
+.dia-contenido.activo {
+    display: block;
+}
+.input-group {
+    background: #e9f0fc;
+    padding: 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.input-group div {
+    display: flex;
+    flex-direction: column;
+}
+.input-group label {
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 0.7rem;
+    color: #2c3e50;
+}
+.input-group input, .input-group select {
+    padding: 6px 4px;
+    border-radius: 25px;
+    border: 2px solid #3498db;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+    background: white;
+    width: 100%;
+}
+.table-wrapper {
+    overflow-x: auto;
+    margin: 0 -5px;
+    padding: 0 5px;
+    border-radius: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f8fafc;
+    border-radius: 15px;
+    min-width: 700px;
+}
+th {
+    background: #2c3e50;
+    color: white;
+    padding: 8px 4px;
+    font-size: 0.7rem;
+}
+td {
+    padding: 6px 2px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    font-size: 0.7rem;
+}
+td input[type=number] {
+    width: 55px;
+    padding: 5px 2px;
+    text-align: center;
+    font-size: 0.75rem;
+    border: 2px solid #3498db;
+    border-radius: 20px;
+}
+.total-row {
+    background: #d9e2ec;
+    font-weight: bold;
+}
+.verde {
+    background: #d4edda;
+    color: #155724;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 50px;
+}
+.rojo {
+    background: #f8d7da;
+    color: #721c24;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    min-width: 50px;
+}
+.result-dia {
+    background: #eef2f6;
+    padding: 12px;
+    border-radius: 15px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    text-align: left;
+}
+.result-dia p {
+    margin: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.result-dia span {
+    font-weight: bold;
+    color: #1e3c72;
+    background: #ffc107;
+    padding: 4px 12px;
+    border-radius: 30px;
+    display: inline-block;
+    font-size: 0.8rem;
+}
+.botones-accion {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+.botones-accion button {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    margin: 0;
+    width: auto;
+    max-width: none;
+    background: #ffc107;
+    border: none;
+    border-radius: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.resumen-semanal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 20px;
+    margin-top: 15px;
+}
+.resumen-semanal table {
+    background: rgba(255,255,255,0.9);
+    color: black;
+    min-width: 100%;
+}
+.resumen-semanal th {
+    background: #2c3e50;
+}
+.resumen-semanal td {
+    padding: 8px 5px;
+}
+.total-semanal {
+    background: #ffc107;
+    color: #1e3c72;
+    padding: 12px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+button {
+    background: #ffc107;
+    border: none;
+    border-radius: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+}
+button:active {
+    transform: scale(0.98);
+}
+.toast-notificacion {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>📅 CONTROL SEMANAL</h2>
+    <h3>NORLAN GARCÍA (Lunes a Sábado) <span class="auto-save-badge">💾 GUARDADO AUTOMÁTICO</span></h3>
+
+    <div class="fecha-bar">
+        <span>📆 Semana del:</span>
+        <input type="date" id="semanaInicio" value="">
+        <button onclick="cargarSemana()">📂 Cargar Semana</button>
+        <button onclick="nuevaSemana()">🆕 Nueva Semana</button>
+    </div>
+
+    <div id="diasContainer"></div>
+
+    <div class="botones-accion">
+        <button onclick="exportarSemana()">📤 Exportar Respaldo</button>
+        <button onclick="importarSemana()">📥 Importar Respaldo</button>
+        <button onclick="verHistorialSemanas()">📜 Ver Historial</button>
+    </div>
+
+    <div id="resumenSemanal" class="resumen-semanal"></div>
+</div>
+
+<div id="toast" class="toast-notificacion">✅ Datos guardados automáticamente</div>
+
+<!-- Modal para historial de semanas -->
+<div id="historialModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); overflow-y:auto;">
+    <div style="background:white; margin:20px auto; padding:20px; border-radius:20px; width:95%; max-width:900px; color:black;">
+        <span onclick="cerrarModal()" style="float:right; font-size:28px; cursor:pointer;">&times;</span>
+        <h3>📋 Historial de Semanas Guardadas</h3>
+        <div id="historialLista"></div>
+    </div>
+</div>
+
+<script>
+// Días de la semana (lunes a sábado)
+const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+let timeoutGuardado = null;
+
+function mostrarToast() {
+    let toast = document.getElementById('toast');
+    toast.style.opacity = '1';
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 1500);
+}
+
+// Obtener fecha de inicio de semana (lunes)
+function obtenerInicioSemana(fecha) {
+    let fechaObj = new Date(fecha);
+    let dia = fechaObj.getDay();
+    let diff = (dia === 0 ? 6 : dia - 1);
+    fechaObj.setDate(fechaObj.getDate() - diff);
+    return fechaObj;
+}
+
+function formatearFecha(fecha) {
+    let año = fecha.getFullYear();
+    let mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    let dia = String(fecha.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${dia}`;
+}
+
+function obtenerFechaActual() {
+    let hoy = new Date();
+    return formatearFecha(hoy);
+}
+
+function obtenerFechasSemana() {
+    let inicioInput = document.getElementById('semanaInicio').value;
+    let inicio;
+    if (inicioInput) {
+        inicio = new Date(inicioInput);
+    } else {
+        inicio = obtenerInicioSemana(new Date());
+    }
+    
+    let fechas = [];
+    for (let i = 0; i < 6; i++) {
+        let fecha = new Date(inicio);
+        fecha.setDate(inicio.getDate() + i);
+        fechas.push(formatearFecha(fecha));
+    }
+    return fechas;
+}
+
+function obtenerDatosPorDefecto() {
+    return {
+        tareas: 283,
+        desayuno: 0.5,
+        horaPedida: 12,
+        horaReal: 11,
+        minutosReal: 30,
+        metas: [80, 80, 80, 43],
+        reales: [0, 0, 0, 0]
+    };
+}
+
+// Función de cálculo completa con acumulados
+function calcularDiaCompleto(datos) {
+    let tareas = parseFloat(datos.tareas) || 0;
+    let horaPedida = parseInt(datos.horaPedida);
+    let horaReal = parseInt(datos.horaReal);
+    let minutosReal = parseInt(datos.minutosReal) || 0;
+    let desayuno = parseFloat(datos.desayuno) || 0;
+    let almuerzo = 0.5;
+    
+    let m1 = parseFloat(datos.metas[0]) || 0;
+    let m2 = parseFloat(datos.metas[1]) || 0;
+    let m3 = parseFloat(datos.metas[2]) || 0;
+    let m4 = parseFloat(datos.metas[3]) || 0;
+    
+    let r1 = parseFloat(datos.reales[0]) || 0;
+    let r2 = parseFloat(datos.reales[1]) || 0;
+    let r3 = parseFloat(datos.reales[2]) || 0;
+    let r4 = parseFloat(datos.reales[3]) || 0;
+    
+    // ACUMULADOS
+    let ma1 = m1;
+    let ma2 = m1 + m2;
+    let ma3 = m1 + m2 + m3;
+    let ma4 = m1 + m2 + m3 + m4;
+    
+    let ra1 = r1;
+    let ra2 = r1 + r2;
+    let ra3 = r1 + r2 + r3;
+    let ra4 = r1 + r2 + r3 + r4;
+    
+    let d1 = ra1 - ma1;
+    let d2 = ra2 - ma2;
+    let d3 = ra3 - ma3;
+    let d4 = ra4 - ma4;
+    
+    // Ritmos por bloque
+    let ritmo1 = (ma1 / 2).toFixed(1);
+    let ritmo2 = ((ma2 - ma1) / 2).toFixed(1);
+    let ritmo3 = ((ma3 - ma2) / 2).toFixed(1);
+    let ritmo4 = ((ma4 - ma3) / 2).toFixed(1);
+    
+    // Horas base
+    let horasBase;
+    if (horaPedida === 14) {
+        horasBase = horaPedida - 6 - desayuno - almuerzo;
+    } else {
+        horasBase = horaPedida - 6 - desayuno;
+    }
+    horasBase = Math.max(0, horasBase);
+    
+    // Horas reales
+    let horasReales;
+    if (horaReal >= 12) {
+        horasReales = horaReal - 6 - desayuno - almuerzo + minutosReal / 60;
+    } else {
+        horasReales = horaReal - 6 - desayuno + minutosReal / 60;
+    }
+    horasReales = Math.max(0, horasReales);
+    
+    let ritmoBase = horasBase > 0 ? tareas / horasBase : 0;
+    let ritmoReal = horasReales > 0 ? ra4 / horasReales : 0;
+    
+    let productividad = ritmoBase > 0 ? (ritmoReal / ritmoBase) * 100 : 0;
+    
+    let rango = "", incentivo = 0;
+    if (productividad >= 130) { rango = "130% o más"; incentivo = 3150; }
+    else if (productividad >= 120) { rango = "120-129.99%"; incentivo = 3000; }
+    else if (productividad >= 110) { rango = "110-119.99%"; incentivo = 2850; }
+    else if (productividad >= 100) { rango = "100-109.99%"; incentivo = 2700; }
+    else if (productividad >= 90) { rango = "90-99.99%"; incentivo = 2400; }
+    else if (productividad >= 80) { rango = "80-89.99%"; incentivo = 2100; }
+    else { rango = "<80%"; incentivo = 0; }
+    
+    return {
+        ma1, ma2, ma3, ma4,
+        ra1, ra2, ra3, ra4,
+        d1, d2, d3, d4,
+        ritmo1, ritmo2, ritmo3, ritmo4,
+        productividad: productividad,
+        rango: rango,
+        incentivo: incentivo,
+        realAcumulado: ra4,
+        ritmoReal: ritmoReal,
+        horasReales: horasReales,
+        horasBase: horasBase,
+        ritmoBase: ritmoBase
+    };
+}
+
+function renderTablaDia(index, datos) {
+    let calc = calcularDiaCompleto(datos);
+    
+    return `
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr style="background: #ffc107; color: #1e3c72;">
+                        <td colspan="8" style="text-align: center; padding: 8px;">👤 NORLAN GARCÍA</td>
+                    </tr>
+                    <tr>
+                        <th>#</th><th>Hora</th><th>Meta</th><th>Real</th><th>M.Acum</th><th>R.Acum</th><th>Dif</th><th>Ritmo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td><td>6-8</td>
+                        <td><input type="number" class="m1-${index}" value="${datos.metas[0]}"></td>
+                        <td><input type="number" class="r1-${index}" value="${datos.reales[0]}"></td>
+                        <td id="ma1-${index}">${calc.ma1}</td>
+                        <td id="ra1-${index}">${calc.ra1}</td>
+                        <td id="dif1-${index}" class="${calc.d1 >= 0 ? 'verde' : 'rojo'}">${calc.d1 >= 0 ? '+' : ''}${calc.d1}</td>
+                        <td id="ritmo1-${index}">${calc.ritmo1}t</td>
+                    </tr>
+                    <tr>
+                        <td>2</td><td>8-10</td>
+                        <td><input type="number" class="m2-${index}" value="${datos.metas[1]}"></td>
+                        <td><input type="number" class="r2-${index}" value="${datos.reales[1]}"></td>
+                        <td id="ma2-${index}">${calc.ma2}</td>
+                        <td id="ra2-${index}">${calc.ra2}</td>
+                        <td id="dif2-${index}" class="${calc.d2 >= 0 ? 'verde' : 'rojo'}">${calc.d2 >= 0 ? '+' : ''}${calc.d2}</td>
+                        <td id="ritmo2-${index}">${calc.ritmo2}t</td>
+                    </tr>
+                    <tr>
+                        <td>3</td><td>10-12</td>
+                        <td><input type="number" class="m3-${index}" value="${datos.metas[2]}"></td>
+                        <td><input type="number" class="r3-${index}" value="${datos.reales[2]}"></td>
+                        <td id="ma3-${index}">${calc.ma3}</td>
+                        <td id="ra3-${index}">${calc.ra3}</td>
+                        <td id="dif3-${index}" class="${calc.d3 >= 0 ? 'verde' : 'rojo'}">${calc.d3 >= 0 ? '+' : ''}${calc.d3}</td>
+                        <td id="ritmo3-${index}">${calc.ritmo3}t</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>12-14</td>
+                        <td><input type="number" class="m4-${index}" value="${datos.metas[3]}"></td>
+                        <td><input type="number" class="r4-${index}" value="${datos.reales[3]}"></td>
+                        <td id="ma4-${index}">${calc.ma4}</td>
+                        <td id="ra4-${index}">${calc.ra4}</td>
+                        <td id="dif4-${index}" class="${calc.d4 >= 0 ? 'verde' : 'rojo'}">${calc.d4 >= 0 ? '+' : ''}${calc.d4}</td>
+                        <td id="ritmo4-${index}">${calc.ritmo4}t</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="2"><strong>TOTAL</strong></td>
+                        <td id="metaTotal-${index}">${calc.ma4}</td>
+                        <td id="realTotal-${index}">${calc.ra4}</td>
+                        <td>-</td>
+                        <td id="raFinal-${index}">${calc.ra4}</td>
+                        <td id="difTotal-${index}" class="${calc.d4 >= 0 ? 'verde' : 'rojo'}">${calc.d4 >= 0 ? '+' : ''}${calc.d4}</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderDia(dia, fecha, datos, index, isActive) {
+    let calc = calcularDiaCompleto(datos);
+    
+    return `
+        <div class="dia-semana ${isActive ? 'activo' : ''}" onclick="toggleDia(${index})">
+            <div class="dia-titulo">
+                <strong>${dia} ${fecha}</strong>
+                <div class="dia-stats">
+                    <span>📈 ${calc.productividad.toFixed(1)}%</span>
+                    <span>🎯 ${calc.rango}</span>
+                    <span>💰 C$${calc.incentivo}</span>
+                </div>
+            </div>
+            <div class="dia-contenido" id="contenido-${index}">
+                <div class="input-group">
+                    <div><label>📦 Tareas totales:</label><input type="number" class="tareas-${index}" value="${datos.tareas}"></div>
+                    <div><label>🍽️ Desayuno (horas):</label><input type="number" class="desayuno-${index}" value="${datos.desayuno}" step="0.5"></div>
+                    <div><label>⏰ Hora pedida:</label>
+                        <select class="horaPedida-${index}">
+                            ${[10,11,12,13,14].map(h => `<option value="${h}" ${datos.horaPedida == h ? 'selected' : ''}>${h}${h<12?'am':'pm'}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div><label>⏱️ Hora real:</label>
+                        <select class="horaReal-${index}">
+                            ${[8,9,10,11,12,13,14].map(h => `<option value="${h}" ${datos.horaReal == h ? 'selected' : ''}>${h}${h<12?'am':'pm'}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div><label>⏱️ Minutos reales:</label>
+                        <select class="minutosReal-${index}">
+                            ${[0,15,30,45].map(m => `<option value="${m}" ${datos.minutosReal == m ? 'selected' : ''}>${m.toString().padStart(2,'0')}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                ${renderTablaDia(index, datos)}
+                <div class="result-dia" id="resultado-${index}">
+                    <p>⏳ Horas base: <span>${calc.horasBase.toFixed(2)}h</span> | Ritmo base: <span>${calc.ritmoBase.toFixed(2)} t/h</span></p>
+                    <p>⏱️ Tus horas: <span>${calc.horasReales.toFixed(2)}h</span> | Ritmo real: <span>${calc.ritmoReal.toFixed(2)} t/h</span></p>
+                    <p>📈 Productividad: <span>${calc.productividad.toFixed(1)}%</span></p>
+                    <p>🎯 Rango: <span>${calc.rango}</span> | 💰 Incentivo: <span>C$${calc.incentivo}</span></p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function actualizarTodoDia(index) {
+    let datos = obtenerDatosDelDia(index);
+    let calc = calcularDiaCompleto(datos);
+    
+    // Actualizar celdas de acumulados
+    document.getElementById(`ma1-${index}`).innerText = calc.ma1;
+    document.getElementById(`ma2-${index}`).innerText = calc.ma2;
+    document.getElementById(`ma3-${index}`).innerText = calc.ma3;
+    document.getElementById(`ma4-${index}`).innerText = calc.ma4;
+    document.getElementById(`ra1-${index}`).innerText = calc.ra1;
+    document.getElementById(`ra2-${index}`).innerText = calc.ra2;
+    document.getElementById(`ra3-${index}`).innerText = calc.ra3;
+    document.getElementById(`ra4-${index}`).innerText = calc.ra4;
+    document.getElementById(`metaTotal-${index}`).innerText = calc.ma4;
+    document.getElementById(`realTotal-${index}`).innerText = calc.ra4;
+    document.getElementById(`raFinal-${index}`).innerText = calc.ra4;
+    
+    // Actualizar diferencias
+    function actualizarDif(id, val) {
+        let el = document.getElementById(id);
+        el.innerText = (val >= 0 ? '+' : '') + val;
+        el.className = val >= 0 ? 'verde' : 'rojo';
+    }
+    actualizarDif(`dif1-${index}`, calc.d1);
+    actualizarDif(`dif2-${index}`, calc.d2);
+    actualizarDif(`dif3-${index}`, calc.d3);
+    actualizarDif(`dif4-${index}`, calc.d4);
+    actualizarDif(`difTotal-${index}`, calc.d4);
+    
+    // Actualizar ritmos
+    document.getElementById(`ritmo1-${index}`).innerText = calc.ritmo1 + 't';
+    document.getElementById(`ritmo2-${index}`).innerText = calc.ritmo2 + 't';
+    document.getElementById(`ritmo3-${index}`).innerText = calc.ritmo3 + 't';
+    document.getElementById(`ritmo4-${index}`).innerText = calc.ritmo4 + 't';
+    
+    // Actualizar resultado
+    let divResultado = document.getElementById(`resultado-${index}`);
+    if (divResultado) {
+        divResultado.innerHTML = `
+            <p>⏳ Horas base: <span>${calc.horasBase.toFixed(2)}h</span> | Ritmo base: <span>${calc.ritmoBase.toFixed(2)} t/h</span></p>
+            <p>⏱️ Tus horas: <span>${calc.horasReales.toFixed(2)}h</span> | Ritmo real: <span>${calc.ritmoReal.toFixed(2)} t/h</span></p>
+            <p>📈 Productividad: <span>${calc.productividad.toFixed(1)}%</span></p>
+            <p>🎯 Rango: <span>${calc.rango}</span> | 💰 Incentivo: <span>C$${calc.incentivo}</span></p>
+        `;
+    }
+    
+    // Actualizar título del día
+    let diaDiv = document.querySelectorAll('.dia-semana')[index];
+    if (diaDiv) {
+        let statsDiv = diaDiv.querySelector('.dia-stats');
+        if (statsDiv) {
+            statsDiv.innerHTML = `
+                <span>📈 ${calc.productividad.toFixed(1)}%</span>
+                <span>🎯 ${calc.rango}</span>
+                <span>💰 C$${calc.incentivo}</span>
+            `;
+        }
+    }
+    
+    renderResumenSemanal();
+    
+    // GUARDADO AUTOMÁTICO - cada vez que se actualiza un día
+    guardarSemanaAuto();
+}
+
+function obtenerDatosDelDia(index) {
+    return {
+        tareas: document.querySelector(`.tareas-${index}`)?.value || 283,
+        desayuno: document.querySelector(`.desayuno-${index}`)?.value || 0.5,
+        horaPedida: document.querySelector(`.horaPedida-${index}`)?.value || 12,
+        horaReal: document.querySelector(`.horaReal-${index}`)?.value || 11,
+        minutosReal: document.querySelector(`.minutosReal-${index}`)?.value || 30,
+        metas: [
+            document.querySelector(`.m1-${index}`)?.value || 0,
+            document.querySelector(`.m2-${index}`)?.value || 0,
+            document.querySelector(`.m3-${index}`)?.value || 0,
+            document.querySelector(`.m4-${index}`)?.value || 0
+        ],
+        reales: [
+            document.querySelector(`.r1-${index}`)?.value || 0,
+            document.querySelector(`.r2-${index}`)?.value || 0,
+            document.querySelector(`.r3-${index}`)?.value || 0,
+            document.querySelector(`.r4-${index}`)?.value || 0
+        ]
+    };
+}
+
+function guardarSemanaAuto() {
+    // Usar setTimeout para evitar múltiples guardados seguidos
+    if (timeoutGuardado) clearTimeout(timeoutGuardado);
+    timeoutGuardado = setTimeout(() => {
+        let semanaKey = document.getElementById('semanaInicio').value;
+        if (!semanaKey) return;
+        
+        let fechas = obtenerFechasSemana();
+        let semana = {};
+        for (let i = 0; i < 6; i++) {
+            semana[fechas[i]] = obtenerDatosDelDia(i);
+        }
+        
+        let todasSemanas = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+        todasSemanas[semanaKey] = semana;
+        localStorage.setItem('semanasNorlan', JSON.stringify(todasSemanas));
+        mostrarToast();
+    }, 500);
+}
+
+function cargarSemana() {
+    let semanaKey = document.getElementById('semanaInicio').value;
+    if (!semanaKey) {
+        alert('❌ Seleccione una fecha de inicio de semana');
+        return;
+    }
+    
+    let todasSemanas = JSON.parse(localStorage.getItem('semanasNorlan') || '{}');
+    let semana = todasSemanas[semanaKey];
+    
+    if (!semana) {
+        alert('❌ No hay datos guardados para esta semana');
+        return;
+    }
+    
+    let fechas = obtenerFechasSemana();
+    for (let i = 0; i < 6; i++) {
+        let fecha = fechas[i];
+        let datos = semana[fecha];
+        if (datos) {
+            if (document.querySelector(`.tareas-${i}`)) {
+                document.querySelector(`.tareas-${i}`).value = datos.tareas;
+                document.querySelector(`.desayuno-${i}`).value = datos.desayuno;
+                document.querySelector(`.horaPedida-${i}`).value = datos.horaPedida;
+                document.querySelector(`.horaReal-${i}`).value = datos.horaReal;
+                document.querySelector(`.minutosReal-${i}`).value = datos.minutosReal;
+                document.querySelector(`.m1-${i}`).value = datos.metas[0];
+                document.querySelector(`.m2-${i}`).value = datos.metas[1];
+                document.querySelector(`.m3-${i}`).value = datos.metas[2];
+                document.querySelector(`.m4-${i}`).value = datos.metas[3];
+                document.querySelector(`.r1-${i}`).value = datos.reales[0];
+                document.querySelector(`.r2-${i}`).value = datos.reales[1];
+                document.querySelector(`.r3-${i}`).value = datos.reales[2];
+                document.querySelector(`.r4-${i}`).value = datos.reales[3];
+                actualizarTodoDia(i);
+            }
+        }
+    }
+    alert('✅ Semana cargada correctamente');
+}
+
+function nuevaSemana() {
+    if (confirm('¿Crear nueva semana? Los datos actuales se guardarán automáticamente.')) {
+        let hoy = new Date();
+        let inicioSemana = obtenerInicioSemana(hoy);
+        document.getElementById('semanaInicio').value = formatearFecha(inicioSemana);
+        renderizarSemana();
+    }
+}
+
+function exportarSemana() {
+    let todasSemanas = localStorage.getItem('semanasNorlan');
+    if (!todasSemanas || todasSemanas === '{}') {
+        alert('No hay datos para exportar');
+        return;
+    }
+    
+    let blob = new Blob([todasSemanas], {type: 'application/json'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `respaldo_semanas_norlan_${obtenerFechaActual()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('✅ Datos exportados exitosamente');
+}
+
+function importarSemana() {
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = function
